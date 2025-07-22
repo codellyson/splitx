@@ -1,45 +1,60 @@
+import Group from '#models/group'
 import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
 
-export default function Groups(props: { groups: any; user: any }) {
+export default function Groups(props: { groups: Group[]; user: any }) {
   const [showCreateModal, setShowCreateModal] = useState(false)
   console.log(props)
   const { groups: _groups, user } = props
   // Mock data - replace with real data from backend
-  const groups = [
-    {
-      id: 1,
-      name: 'Weekend Trip to Miami',
-      description: 'Beach vacation with friends',
-      members: 6,
-      totalExpenses: 1250.5,
-      yourBalance: -45.2,
-      currency: 'USD',
-      createdAt: '2024-01-15',
-    },
-    {
-      id: 2,
-      name: 'Apartment Rent',
-      description: 'Monthly rent and utilities',
-      members: 3,
-      totalExpenses: 2800.0,
-      yourBalance: 0.0,
-      currency: 'USD',
-      createdAt: '2024-01-01',
-    },
-    {
-      id: 3,
-      name: 'Birthday Party',
-      description: "Sarah's 25th birthday celebration",
-      members: 8,
-      totalExpenses: 320.75,
-      yourBalance: 15.5,
-      currency: 'USD',
-      createdAt: '2024-01-20',
-    },
-  ]
+  // const groups = [
+  //   {
+  //     id: 1,
+  //     name: 'Weekend Trip to Miami',
+  //     description: 'Beach vacation with friends',
+  //     members: 6,
+  //     totalExpenses: 1250.5,
+  //     yourBalance: -45.2,
+  //     currency: 'USD',
+  //     createdAt: '2024-01-15',
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Apartment Rent',
+  //     description: 'Monthly rent and utilities',
+  //     members: 3,
+  //     totalExpenses: 2800.0,
+  //     yourBalance: 0.0,
+  //     currency: 'USD',
+  //     createdAt: '2024-01-01',
+  //   },
+  //   {
+  //     id: 3,
+  //     name: 'Birthday Party',
+  //     description: "Sarah's 25th birthday celebration",
+  //     members: 8,
+  //     totalExpenses: 320.75,
+  //     yourBalance: 15.5,
+  //     currency: 'USD',
+  //     createdAt: '2024-01-20',
+  //   },
+  // ]
+
+  const groups = _groups.map((group) => ({
+    ...group,
+    members: group.group_members.length,
+    totalExpenses: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0),
+    yourBalance: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0),
+    currency: 'USD',
+    createdAt: group.created_at,
+  }))
+
+  const [newGroup, setNewGroup] = useState({
+    name: '',
+    description: '',
+  })
 
   const handleViewDetails = (groupId: number) => {
     router.visit(`/groups/${groupId}`)
@@ -48,6 +63,47 @@ export default function Groups(props: { groups: any; user: any }) {
   const handleAddExpense = (groupId: number) => {
     router.visit(`/groups/${groupId}/expenses/create`)
   }
+
+  const handleCreateGroup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    router.post(
+      '/groups/create',
+      {
+        name: newGroup.name,
+        description: newGroup.description,
+      },
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          setShowCreateModal(false)
+          setNewGroup({
+            name: '',
+            description: '',
+          })
+        },
+      }
+    )
+  }
+  //   [
+  //     {
+  //         "id": 1,
+  //         "name": "Nash Albert",
+  //         "description": "Non est expedita dol",
+  //         "created_by": 1,
+  //         "created_at": "2025-07-22T02:51:46.036+00:00",
+  //         "updated_at": "2025-07-22T02:51:46.037+00:00",
+  //         "group_members": [
+  //             {
+  //                 "id": 1,
+  //                 "user_id": 1,
+  //                 "group_id": 1,
+  //                 "nickname": "Lukman Isiaka",
+  //                 "created_at": "2025-07-22T02:51:46.582+00:00",
+  //                 "updated_at": "2025-07-22T02:51:46.582+00:00"
+  //             }
+  //         ]
+  //     }
+  // ]
 
   return (
     <>
@@ -199,7 +255,7 @@ export default function Groups(props: { groups: any; user: any }) {
                 </button>
               </div>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleCreateGroup}>
                 <div>
                   <label
                     htmlFor="groupName"
@@ -213,6 +269,8 @@ export default function Groups(props: { groups: any; user: any }) {
                     name="groupName"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                     placeholder="e.g., Weekend Trip to Miami"
+                    value={newGroup.name}
+                    onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
                   />
                 </div>
 
@@ -229,6 +287,8 @@ export default function Groups(props: { groups: any; user: any }) {
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                     placeholder="Brief description of the group"
+                    value={newGroup.description}
+                    onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
                   />
                 </div>
 

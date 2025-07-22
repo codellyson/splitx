@@ -21,6 +21,8 @@ router.get('/profile', [SessionController, 'profile']).use(middleware.auth())
 
 // Group routes
 router.get('/groups', [GroupsController, 'index']).use(middleware.auth())
+router.post('/groups/create', [GroupsController, 'create']).use(middleware.auth())
+router.get('/groups/:id', [GroupsController, 'show']).use(middleware.auth())
 // router.on('/groups/:id').renderInertia('group-detail')
 // router.on('/groups/:id/expenses/create').renderInertia('create-expense')
 // router.on('/groups/:id/settle').renderInertia('settle-balance')

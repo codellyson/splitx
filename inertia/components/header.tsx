@@ -1,11 +1,10 @@
 interface HeaderProps {
   className?: string
   auth: any
-  user: any
 }
 
-export default function Header({ auth, className = '', user }: HeaderProps) {
-  console.log(auth, user)
+export default function Header({ auth, className = '' }: HeaderProps) {
+  console.log(auth)
   return (
     <header className={`bg-white border-b border-gray-100 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
