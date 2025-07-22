@@ -45,8 +45,8 @@ export default function Groups(props: { groups: Group[]; user: any }) {
   const groups = _groups.map((group) => ({
     ...group,
     members: group.group_members.length,
-    totalExpenses: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0),
-    yourBalance: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0),
+    totalExpenses: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0) || 0,
+    yourBalance: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0) || 0,
     currency: 'USD',
     createdAt: group.created_at,
   }))

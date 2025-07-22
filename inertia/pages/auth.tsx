@@ -39,7 +39,7 @@ export default function Auth() {
       <Head title={isLogin ? 'Login - SplitX' : 'Sign up - SplitX'} />
 
       <div className="min-h-screen bg-white">
-        <Header />
+        <Header auth={null} />
 
         {/* Auth Section */}
         <section className="py-20 bg-gradient-to-br from-teal-50 to-green-50">

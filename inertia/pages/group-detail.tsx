@@ -1,74 +1,75 @@
+import Group from '#models/group'
 import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
-import Header from '../components/header'
 import Footer from '../components/footer'
+import Header from '../components/header'
 
-export default function GroupDetail() {
+export default function GroupDetail(props: { group: Group; user: any }) {
+  console.log(props)
   const [activeTab, setActiveTab] = useState('expenses') // expenses, members, balances
 
   // Mock data - replace with real data from backend
   const group = {
-    id: 1,
-    name: 'Weekend Trip to Miami',
-    description: 'Beach vacation with friends',
+    id: props.group.id,
+    name: props.group.name,
+    description: props.group.description,
     currency: 'USD',
-    createdAt: '2024-01-15',
-    totalExpenses: 1250.50,
-    members: [
-      { id: 1, name: 'Sophia Carter', email: 'sophia@example.com', balance: -45.20, avatar: 'SC' },
-      { id: 2, name: 'John Doe', email: 'john@example.com', balance: 120.50, avatar: 'JD' },
-      { id: 3, name: 'Jane Smith', email: 'jane@example.com', balance: -75.30, avatar: 'JS' },
-      { id: 4, name: 'Mike Johnson', email: 'mike@example.com', balance: 0.00, avatar: 'MJ' },
-      { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com', balance: 25.80, avatar: 'SW' },
-      { id: 6, name: 'Tom Brown', email: 'tom@example.com', balance: -26.80, avatar: 'TB' }
-    ],
+    createdAt: props.group.created_at,
+    totalExpenses: props.expenses.reduce((acc, expense) => acc + expense.amount, 0),
+    members: props.group_members.map((member) => ({
+      id: member.id,
+      name: member.nickname,
+      // email: member.user.email,
+      // balance: member.amount_owed,
+      // avatar: member.user.avatar || 'SC',
+    })),
     expenses: [
       {
         id: 1,
         title: 'Hotel Booking',
-        amount: 450.00,
+        amount: 450.0,
         paidBy: 'Sophia Carter',
         category: 'accommodation',
         date: '2024-01-20',
-        description: '3 nights at Miami Beach Hotel'
+        description: '3 nights at Miami Beach Hotel',
       },
       {
         id: 2,
         title: 'Dinner at Italian Restaurant',
-        amount: 180.50,
+        amount: 180.5,
         paidBy: 'John Doe',
         category: 'food',
         date: '2024-01-21',
-        description: 'Group dinner on first night'
+        description: 'Group dinner on first night',
       },
       {
         id: 3,
         title: 'Car Rental',
-        amount: 320.00,
+        amount: 320.0,
         paidBy: 'Jane Smith',
         category: 'transport',
         date: '2024-01-22',
-        description: 'SUV rental for the weekend'
+        description: 'SUV rental for the weekend',
       },
       {
         id: 4,
         title: 'Beach Activities',
-        amount: 150.00,
+        amount: 150.0,
         paidBy: 'Sarah Wilson',
         category: 'entertainment',
         date: '2024-01-23',
-        description: 'Jet ski and parasailing'
+        description: 'Jet ski and parasailing',
       },
       {
         id: 5,
         title: 'Groceries',
-        amount: 150.00,
+        amount: 150.0,
         paidBy: 'Tom Brown',
         category: 'food',
         date: '2024-01-24',
-        description: 'Food and drinks for the trip'
-      }
-    ]
+        description: 'Food and drinks for the trip',
+      },
+    ],
   }
 
   const handleAddExpense = () => {
@@ -84,8 +85,8 @@ export default function GroupDetail() {
       data: {
         memberId,
         amount: Math.abs(amount),
-        recipient: group.members.find(m => m.id === memberId)?.name
-      }
+        recipient: group.members.find((m) => m.id === memberId)?.name,
+      },
     })
   }
 
@@ -94,8 +95,8 @@ export default function GroupDetail() {
       data: {
         memberId,
         amount: Math.abs(amount),
-        recipient: group.members.find(m => m.id === memberId)?.name
-      }
+        recipient: group.members.find((m) => m.id === memberId)?.name,
+      },
     })
   }
 
@@ -108,7 +109,7 @@ export default function GroupDetail() {
       utilities: '⚡',
       rent: '🏠',
       general: '💰',
-      other: '📝'
+      other: '📝',
     }
     return icons[category as keyof typeof icons] || '💰'
   }
@@ -118,7 +119,7 @@ export default function GroupDetail() {
       <Head title={`${group.name} - SplitX`} />
 
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <Header auth={props.user} />
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -130,7 +131,12 @@ export default function GroupDetail() {
                 className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
               </button>
               <div>
@@ -145,11 +151,23 @@ export default function GroupDetail() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Total Expenses</p>
-                    <p className="text-2xl font-bold text-gray-800">${group.totalExpenses.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      ${group.totalExpenses.toFixed(2)}
+                    </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -162,8 +180,18 @@ export default function GroupDetail() {
                     <p className="text-2xl font-bold text-gray-800">{group.members.length}</p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -173,13 +201,26 @@ export default function GroupDetail() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Your Balance</p>
-                    <p className={`text-2xl font-bold ${group.members[0].balance > 0 ? 'text-green-600' : group.members[0].balance < 0 ? 'text-red-600' : 'text-gray-800'}`}>
-                      {group.members[0].balance > 0 ? '+' : ''}${group.members[0].balance.toFixed(2)}
+                    <p
+                      className={`text-2xl font-bold ${group.members?.[0]?.balance > 0 ? 'text-green-600' : group.members?.[0]?.balance < 0 ? 'text-red-600' : 'text-gray-800'}`}
+                    >
+                      {group.members?.[0]?.balance > 0 ? '+' : ''}$
+                      {group.members?.[0]?.balance?.toFixed(2)}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -193,7 +234,12 @@ export default function GroupDetail() {
                 className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center space-x-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
                 </svg>
                 <span>View Summary</span>
               </button>
@@ -202,7 +248,12 @@ export default function GroupDetail() {
                 className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors font-medium flex items-center space-x-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
                 </svg>
                 <span>Add Expense</span>
               </button>
@@ -251,7 +302,10 @@ export default function GroupDetail() {
               {activeTab === 'expenses' && (
                 <div className="space-y-4">
                   {group.expenses.map((expense) => (
-                    <div key={expense.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div
+                      key={expense.id}
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
                           {getCategoryIcon(expense.category)}
@@ -259,7 +313,9 @@ export default function GroupDetail() {
                         <div>
                           <h3 className="font-medium text-gray-800">{expense.title}</h3>
                           <p className="text-sm text-gray-600">{expense.description}</p>
-                          <p className="text-xs text-gray-500">Paid by {expense.paidBy} • {expense.date}</p>
+                          <p className="text-xs text-gray-500">
+                            Paid by {expense.paidBy} • {expense.date}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -274,7 +330,10 @@ export default function GroupDetail() {
               {activeTab === 'members' && (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {group.members.map((member) => (
-                    <div key={member.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                    <div
+                      key={member.id}
+                      className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                    >
                       <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-medium">{member.avatar}</span>
                       </div>
@@ -291,7 +350,10 @@ export default function GroupDetail() {
               {activeTab === 'balances' && (
                 <div className="space-y-4">
                   {group.members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-sm font-medium">{member.avatar}</span>
@@ -302,16 +364,26 @@ export default function GroupDetail() {
                       </div>
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
-                          <p className={`font-bold ${member.balance > 0 ? 'text-green-600' : member.balance < 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                            {member.balance > 0 ? '+' : ''}${member.balance.toFixed(2)}
+                          <p
+                            className={`font-bold ${member.balance > 0 ? 'text-green-600' : member.balance < 0 ? 'text-red-600' : 'text-gray-600'}`}
+                          >
+                            {member.balance > 0 ? '+' : ''}${member?.balance?.toFixed(2)}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {member.balance > 0 ? 'Owes you' : member.balance < 0 ? 'You owe' : 'Settled up'}
+                            {member.balance > 0
+                              ? 'Owes you'
+                              : member.balance < 0
+                                ? 'You owe'
+                                : 'Settled up'}
                           </p>
                         </div>
-                                                {member.balance !== 0 && (
+                        {member.balance !== 0 && (
                           <button
-                            onClick={() => member.balance > 0 ? handleRequestPayment(member.id, member.balance) : handleSettleBalance(member.id, member.balance)}
+                            onClick={() =>
+                              member.balance > 0
+                                ? handleRequestPayment(member.id, member.balance)
+                                : handleSettleBalance(member.id, member.balance)
+                            }
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                               member.balance > 0
                                 ? 'bg-green-100 text-green-700 hover:bg-green-200'

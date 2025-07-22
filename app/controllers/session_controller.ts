@@ -13,7 +13,9 @@ export default class SessionController {
     /**
      * Step 2: Verify credentials
      */
+    const _user = await User.findBy('email', email)
     const user = await User.verifyCredentials(email, password)
+    console.log({ _user, user })
 
     /**
      * Step 3: Login user
@@ -28,7 +30,6 @@ export default class SessionController {
 
   async destroy({ auth, response }: HttpContext) {
     await auth.use('web').logout()
-    response.redirect('/')
   }
 
   async signup({ request, auth, response }: HttpContext) {

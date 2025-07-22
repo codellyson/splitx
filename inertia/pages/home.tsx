@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react'
-import Header from '../components/header'
 import Footer from '../components/footer'
+import Header from '../components/header'
 
 export default function Home() {
   return (
@@ -8,7 +8,7 @@ export default function Home() {
       <Head title="SplitX - Split expenses, simplify payments" />
 
       <div className="min-h-screen bg-white">
-        <Header />
+        <Header auth={null} />
 
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-teal-50 to-green-50 rounded-t-3xl">
@@ -34,7 +34,8 @@ export default function Home() {
                 Split expenses, simplify payments
               </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                SplitX makes it easy to manage shared expenses, track balances, and settle up with friends and family. No more awkward IOUs or complicated calculations.
+                SplitX makes it easy to manage shared expenses, track balances, and settle up with
+                friends and family. No more awkward IOUs or complicated calculations.
               </p>
 
               {/* Hero CTA Buttons */}
@@ -55,41 +56,82 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">How SplitX works</h2>
-              <p className="text-xl text-gray-600">SplitX simplifies group expenses with a few easy steps.</p>
+              <p className="text-xl text-gray-600">
+                SplitX simplifies group expenses with a few easy steps.
+              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {/* Step 1 */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  <svg
+                    className="w-8 h-8 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Create a group</h3>
-                <p className="text-gray-600">Start by creating a group for your trip, event, or shared living arrangement. Invite friends and family to join.</p>
+                <p className="text-gray-600">
+                  Start by creating a group for your trip, event, or shared living arrangement.
+                  Invite friends and family to join.
+                </p>
               </div>
 
               {/* Step 2 */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg
+                    className="w-8 h-8 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Add expenses</h3>
-                <p className="text-gray-600">Easily add expenses to the group, specifying who paid and who owes. SplitX automatically calculates balances.</p>
+                <p className="text-gray-600">
+                  Easily add expenses to the group, specifying who paid and who owes. SplitX
+                  automatically calculates balances.
+                </p>
               </div>
 
               {/* Step 3 */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                  <svg
+                    className="w-8 h-8 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Settle up</h3>
-                <p className="text-gray-600">Settle balances with direct bank transfers or other payment methods. Export summaries or share payment links for easy tracking.</p>
+                <p className="text-gray-600">
+                  Settle balances with direct bank transfers or other payment methods. Export
+                  summaries or share payment links for easy tracking.
+                </p>
               </div>
             </div>
           </div>
@@ -100,7 +142,9 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">Features</h2>
-              <p className="text-xl text-gray-600">SplitX offers a range of features to make managing shared expenses a breeze.</p>
+              <p className="text-xl text-gray-600">
+                SplitX offers a range of features to make managing shared expenses a breeze.
+              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -115,7 +159,10 @@ export default function Home() {
                 </div>
                 <div className="p-8">
                   <h3 className="text-xl font-bold text-gray-800 mb-4">Group expenses</h3>
-                  <p className="text-gray-600">Create groups for any shared expense, from trips and events to shared living costs. Invite participants and manage expenses easily.</p>
+                  <p className="text-gray-600">
+                    Create groups for any shared expense, from trips and events to shared living
+                    costs. Invite participants and manage expenses easily.
+                  </p>
                 </div>
               </div>
 
@@ -131,7 +178,10 @@ export default function Home() {
                 </div>
                 <div className="p-8">
                   <h3 className="text-xl font-bold text-gray-800 mb-4">Balance tracking</h3>
-                  <p className="text-gray-600">Track who owes whom with real-time balance updates. See a clear breakdown of expenses and payments within each group.</p>
+                  <p className="text-gray-600">
+                    Track who owes whom with real-time balance updates. See a clear breakdown of
+                    expenses and payments within each group.
+                  </p>
                 </div>
               </div>
 
@@ -146,7 +196,10 @@ export default function Home() {
                 </div>
                 <div className="p-8">
                   <h3 className="text-xl font-bold text-gray-800 mb-4">Payment integration</h3>
-                  <p className="text-gray-600">Settle balances directly through the app with integrated payment methods. Export summaries or share payment links for easy reconciliation.</p>
+                  <p className="text-gray-600">
+                    Settle balances directly through the app with integrated payment methods. Export
+                    summaries or share payment links for easy reconciliation.
+                  </p>
                 </div>
               </div>
             </div>
@@ -156,8 +209,12 @@ export default function Home() {
         {/* Final CTA Section */}
         <section className="py-20 bg-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Ready to simplify your shared expenses?</h2>
-            <p className="text-xl text-gray-600 mb-8">Sign up for SplitX today and experience the easiest way to manage group finances.</p>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              Ready to simplify your shared expenses?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Sign up for SplitX today and experience the easiest way to manage group finances.
+            </p>
             <button className="px-8 py-3 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium">
               Get started
             </button>

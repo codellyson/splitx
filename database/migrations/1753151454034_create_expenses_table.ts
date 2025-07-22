@@ -6,12 +6,13 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('group_id').unique().references('groups.id').notNullable()
+      table.integer('group_id').references('groups.id').notNullable()
       table.text('title').notNullable()
+      table.text('description').nullable()
       table.decimal('amount', 12, 2).notNullable()
-      table.integer('paid_by').unique().references('users.id').notNullable()
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      table.integer('paid_by').references('users.id').notNullable()
+      table.timestamp('created_at').defaultTo(this.now())
+      table.timestamp('updated_at').defaultTo(this.now())
     })
   }
 

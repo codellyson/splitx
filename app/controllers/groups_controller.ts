@@ -16,19 +16,17 @@ export default class GroupsController {
     const user = await auth.use('web').authenticate()
     const group = await Group.query()
       .where('id', params.id)
-      .preload('group_members', (query) => {
-        query.preload('user')
-      })
+
       .first()
     if (!group) {
       return response.redirect().toRoute('groups.index')
     }
-    const groupMembers = await GroupMember.query().where('group_id', params.id).preload('user')
+    const groupMembers = await GroupMember.query().where('group_id', params.id)
     const expenses = await Expense.query().where('group_id', params.id).preload('expense_splits')
     return inertia.render('group-detail', {
       group,
       user,
-      groupMembers,
+      group_members: groupMembers,
       expenses,
     })
   }

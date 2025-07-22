@@ -1,3 +1,5 @@
+import { Link } from '@inertiajs/react'
+
 interface HeaderProps {
   className?: string
   auth: any
@@ -17,54 +19,74 @@ export default function Header({ auth, className = '' }: HeaderProps) {
 
           {/* Navigation Links */}
           <nav className="hidden md:flex space-x-8">
-            <a href="/" className="text-gray-700 hover:text-gray-900 transition-colors">
+            <Link href="/" className="text-gray-700 hover:text-gray-900 transition-colors">
               Home
-            </a>
-            <a href="/groups" className="text-gray-700 hover:text-gray-900 transition-colors">
-              Groups
-            </a>
-            <a href="#how-it-works" className="text-gray-700 hover:text-gray-900 transition-colors">
-              How it works
-            </a>
-            <a href="#features" className="text-gray-700 hover:text-gray-900 transition-colors">
-              Features
-            </a>
-            <a href="#pricing" className="text-gray-700 hover:text-gray-900 transition-colors">
-              Pricing
-            </a>
+            </Link>
+
+            {!auth ? (
+              <>
+                <Link
+                  href="/how-it-works"
+                  className="text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  How it works
+                </Link>
+                <Link
+                  href="/features"
+                  className="text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Features
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Pricing
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/groups"
+                  className="text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Groups
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* CTA Buttons */}
           <div className="flex items-center space-x-4">
             {auth ? (
               <>
-                <a
-                  href="/auth"
+                <Link
+                  href="/auth/logout"
                   className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   Log out
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/profile"
                   className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   Profile
-                </a>
+                </Link>
               </>
             ) : (
               <>
-                <a
+                <Link
                   href="/auth"
                   className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   Log in
-                </a>
-                <a
-                  href="/auth"
+                </Link>
+                <Link
+                  href="/register"
                   className="px-4 py-2 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors"
                 >
                   Sign up
-                </a>
+                </Link>
               </>
             )}
           </div>

@@ -1,7 +1,9 @@
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import * as relations from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import ExpenseSplits from './expense_split.js'
+import Group from './group.js'
+import User from './user.js'
 
 export default class Expense extends BaseModel {
   @column({ isPrimary: true })
@@ -14,10 +16,13 @@ export default class Expense extends BaseModel {
   declare title: string
 
   @column()
+  declare description: string
+
+  @column()
   declare amount: number
 
   @column()
-  declare description: string
+  declare paid_by: number
 
   @column.dateTime({ autoCreate: true })
   declare created_at: DateTime
@@ -30,4 +35,16 @@ export default class Expense extends BaseModel {
     foreignKey: 'expense_id',
   })
   declare expense_splits: relations.HasMany<typeof ExpenseSplits>
+
+  @belongsTo(() => User, {
+    localKey: 'paid_by',
+    foreignKey: 'id',
+  })
+  declare paidByUser: relations.BelongsTo<typeof User>
+
+  @belongsTo(() => Group, {
+    localKey: 'group_id',
+    foreignKey: 'id',
+  })
+  declare group: relations.BelongsTo<typeof Group>
 }

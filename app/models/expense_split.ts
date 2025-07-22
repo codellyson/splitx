@@ -2,6 +2,7 @@ import { BaseModel, belongsTo, column, SnakeCaseNamingStrategy } from '@adonisjs
 import * as relations from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import Expense from './expense.js'
+import User from './user.js'
 
 BaseModel.namingStrategy = new SnakeCaseNamingStrategy()
 
@@ -29,4 +30,10 @@ export default class ExpenseSplits extends BaseModel {
     foreignKey: 'id',
   })
   declare expense: relations.BelongsTo<typeof Expense>
+
+  @belongsTo(() => User, {
+    localKey: 'user_id',
+    foreignKey: 'id',
+  })
+  declare user: relations.BelongsTo<typeof User>
 }

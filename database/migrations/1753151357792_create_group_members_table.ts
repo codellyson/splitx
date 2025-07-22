@@ -6,12 +6,12 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('user_id').unique().references('users.id').notNullable()
-      table.integer('group_id').unique().references('groups.id').notNullable()
+      table.integer('user_id').references('users.id').notNullable()
+      table.integer('group_id').references('groups.id').notNullable()
       table.text('nickname').nullable()
-      table.timestamp('joined_at')
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      table.timestamp('joined_at').defaultTo(this.now())
+      table.timestamp('created_at').defaultTo(this.now())
+      table.timestamp('updated_at').defaultTo(this.now())
     })
   }
 

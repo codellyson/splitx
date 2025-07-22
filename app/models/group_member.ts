@@ -1,8 +1,10 @@
-import { BaseModel, belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, SnakeCaseNamingStrategy } from '@adonisjs/lucid/orm'
 import * as relations from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import Group from './group.js'
 import User from './user.js'
+
+BaseModel.namingStrategy = new SnakeCaseNamingStrategy()
 
 export default class GroupMember extends BaseModel {
   @column({ isPrimary: true })
@@ -17,6 +19,9 @@ export default class GroupMember extends BaseModel {
   @column()
   declare nickname: string
 
+  @column.dateTime()
+  declare joined_at: DateTime
+
   @column.dateTime({ autoCreate: true })
   declare created_at: DateTime
 
@@ -28,9 +33,10 @@ export default class GroupMember extends BaseModel {
     foreignKey: 'id',
   })
   declare user: relations.BelongsTo<typeof User>
-  @hasOne(() => Group, {
+
+  @belongsTo(() => Group, {
     localKey: 'group_id',
     foreignKey: 'id',
   })
-  declare group: relations.HasOne<typeof Group>
+  declare group: relations.BelongsTo<typeof Group>
 }
