@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react'
+import { Head, router } from '@inertiajs/react'
 import Footer from '../components/footer'
 import Header from '../components/header'
 
@@ -40,10 +40,16 @@ export default function Home() {
 
               {/* Hero CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="px-8 py-3 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium">
+                <button
+                  onClick={() => router.visit('/auth')}
+                  className="px-8 py-3 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium"
+                >
                   Sign up
                 </button>
-                <button className="px-8 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors font-medium">
+                <button
+                  onClick={() => router.visit('/auth')}
+                  className="px-8 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                >
                   Log in
                 </button>
               </div>
@@ -215,7 +221,10 @@ export default function Home() {
             <p className="text-xl text-gray-600 mb-8">
               Sign up for SplitX today and experience the easiest way to manage group finances.
             </p>
-            <button className="px-8 py-3 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium">
+            <button
+              onClick={() => router.visit('/auth')}
+              className="px-8 py-3 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium"
+            >
               Get started
             </button>
           </div>
