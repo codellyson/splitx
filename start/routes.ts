@@ -23,8 +23,16 @@ router.get('/profile', [SessionController, 'profile']).use(middleware.auth())
 router.get('/groups', [GroupsController, 'index']).use(middleware.auth())
 router.post('/groups/create', [GroupsController, 'create']).use(middleware.auth())
 router.get('/groups/:id', [GroupsController, 'show']).use(middleware.auth())
+router
+  .get('/groups/:id/expenses/:expenseId', [GroupsController, 'showExpense'])
+  .use(middleware.auth())
 // router.on('/groups/:id').renderInertia('group-detail')
 router.on('/groups/:id/expenses/create').renderInertia('create-expense')
-// router.on('/groups/:id/settle').renderInertia('settle-balance')
-// router.on('/groups/:id/request-payment').renderInertia('request-payment')
-// router.on('/groups/:id/summary').renderInertia('expense-summary')
+router
+  .get('/groups/:id/settle/:expenseSplitId', [GroupsController, 'settleBalance'])
+  .use(middleware.auth())
+
+router
+  .get('/groups/:id/request-payment/:expenseSplitId', [GroupsController, 'requestPayment'])
+  .use(middleware.auth())
+router.get('/groups/:id/summary', [GroupsController, 'summary'])

@@ -1,9 +1,20 @@
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
+import User from '#models/user'
+import Expense from '#models/expense'
+import Group from '#models/group'
+import ExpenseSplit from '#models/expense_split'
 
-export default function SettleBalance() {
+export default function SettleBalance(props: {
+  user: User
+  expenseSplit: ExpenseSplit
+  expense: Expense
+  group: Group
+  group_members: any[]
+  members: User[]
+}) {
   const [paymentMethod, setPaymentMethod] = useState('card')
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentData, setPaymentData] = useState({
@@ -18,15 +29,23 @@ export default function SettleBalance() {
     accountName: '',
   })
 
-  // Mock data - replace with real data from backend
-  const settlement = {
-    groupId: 1,
-    groupName: 'Weekend Trip to Miami',
-    amount: 45.2,
-    currency: 'NGN',
-    recipient: 'John Doe',
-    description: 'Settlement for Weekend Trip to Miami',
-  }
+  // Process the data from props
+  const settlement = useMemo(() => {
+    const amount = Number(props.expenseSplit.amount_owed)
+    const recipient = props.members.find((m) => m.id === props.expense.paid_by)
+    const recipientName = recipient?.full_name || 'Unknown'
+
+    return {
+      groupId: props.group.id,
+      groupName: props.group.name,
+      amount,
+      currency: 'NGN',
+      recipient: recipientName,
+      description: `Settlement for ${props.expense.title}`,
+      expenseTitle: props.expense.title,
+      expenseDescription: props.expense.description,
+    }
+  }, [props.expenseSplit, props.expense, props.group, props.members])
 
   const banks = [
     { code: '044', name: 'Access Bank' },
@@ -59,11 +78,12 @@ export default function SettleBalance() {
     try {
       // Mock Paystack card payment integration
       console.log('Processing card payment:', {
-        amount: paymentData.amount,
+        amount: settlement.amount,
         email: paymentData.email,
         cardNumber: paymentData.cardNumber,
         currency: settlement.currency,
         description: settlement.description,
+        expenseSplitId: props.expenseSplit.id,
       })
 
       // Simulate API call delay
@@ -86,12 +106,13 @@ export default function SettleBalance() {
     try {
       // Mock Paystack bank transfer integration
       console.log('Processing bank transfer:', {
-        amount: paymentData.amount,
+        amount: settlement.amount,
         accountNumber: paymentData.accountNumber,
         bankCode: paymentData.bankCode,
         accountName: paymentData.accountName,
         currency: settlement.currency,
         description: settlement.description,
+        expenseSplitId: props.expenseSplit.id,
       })
 
       // Simulate API call delay
@@ -123,7 +144,7 @@ export default function SettleBalance() {
       <Head title="Settle Balance - SplitX" />
 
       <div className="min-h-screen bg-gray-50">
-        <Header auth={null} />
+        <Header auth={props.user} />
 
         {/* Main Content */}
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -159,6 +180,10 @@ export default function SettleBalance() {
                 <span className="font-medium">{settlement.groupName}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-600">Expense:</span>
+                <span className="font-medium">{settlement.expenseTitle}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Recipient:</span>
                 <span className="font-medium">{settlement.recipient}</span>
               </div>
@@ -167,6 +192,10 @@ export default function SettleBalance() {
                 <span className="font-bold text-lg text-red-600">
                   {formatCurrency(settlement.amount)}
                 </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Description:</span>
+                <span className="font-medium text-sm">{settlement.expenseDescription}</span>
               </div>
             </div>
           </div>

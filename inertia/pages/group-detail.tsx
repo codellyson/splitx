@@ -1,76 +1,299 @@
 import Group from '#models/group'
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
+import User from '#models/user'
+import Expense from '#models/expense'
 
-export default function GroupDetail(props: { group: Group; user: any }) {
+export default function GroupDetail(props: {
+  group: Group
+  user: User
+  expenses: Expense[]
+  group_members: any[]
+}) {
   console.log(props)
-  const [activeTab, setActiveTab] = useState('expenses') // expenses, members, balances
+  const [activeTab, setActiveTab] = useState('expenses') // expenses, members
 
+  //   {
+  //     "user": {
+  //         "id": 4,
+  //         "full_name": "Emily Wilson",
+  //         "email": "emily@example.com",
+  //         "created_at": "2025-07-22T13:38:40.925+00:00",
+  //         "updated_at": "2025-07-22T13:38:40.925+00:00"
+  //     },
+  //     "group": {
+  //         "id": 5,
+  //         "name": "Road Trip to National Parks",
+  //         "description": "Gas, food, and camping expenses for our summer road trip",
+  //         "created_by": 4,
+  //         "created_at": "2025-07-22T13:38:58.259+00:00",
+  //         "updated_at": "2025-07-22T13:38:58.259+00:00"
+  //     },
+  //     "group_members": [
+  //         {
+  //             "id": 1,
+  //             "user_id": 8,
+  //             "group_id": 5,
+  //             "nickname": "John",
+  //             "joined_at": "2025-07-22T13:39:11.403+00:00",
+  //             "created_at": "2025-07-22T13:39:11.404+00:00",
+  //             "updated_at": "2025-07-22T13:39:11.404+00:00"
+  //         },
+  //         {
+  //             "id": 2,
+  //             "user_id": 7,
+  //             "group_id": 5,
+  //             "nickname": "Sarah",
+  //             "joined_at": "2025-07-22T13:39:11.698+00:00",
+  //             "created_at": "2025-07-22T13:39:11.698+00:00",
+  //             "updated_at": "2025-07-22T13:39:11.698+00:00"
+  //         },
+  //         {
+  //             "id": 3,
+  //             "user_id": 6,
+  //             "group_id": 5,
+  //             "nickname": "Mike",
+  //             "joined_at": "2025-07-22T13:39:11.977+00:00",
+  //             "created_at": "2025-07-22T13:39:11.977+00:00",
+  //             "updated_at": "2025-07-22T13:39:11.977+00:00"
+  //         },
+  //         {
+  //             "id": 4,
+  //             "user_id": 5,
+  //             "group_id": 5,
+  //             "nickname": "Emily",
+  //             "joined_at": "2025-07-22T13:39:12.239+00:00",
+  //             "created_at": "2025-07-22T13:39:12.239+00:00",
+  //             "updated_at": "2025-07-22T13:39:12.239+00:00"
+  //         },
+  //         {
+  //             "id": 5,
+  //             "user_id": 4,
+  //             "group_id": 5,
+  //             "nickname": "David",
+  //             "joined_at": "2025-07-22T13:39:12.526+00:00",
+  //             "created_at": "2025-07-22T13:39:12.526+00:00",
+  //             "updated_at": "2025-07-22T13:39:12.527+00:00"
+  //         },
+  //         {
+  //             "id": 6,
+  //             "user_id": 3,
+  //             "group_id": 5,
+  //             "nickname": "Lisa",
+  //             "joined_at": "2025-07-22T13:39:12.805+00:00",
+  //             "created_at": "2025-07-22T13:39:12.805+00:00",
+  //             "updated_at": "2025-07-22T13:39:12.805+00:00"
+  //         }
+  //     ],
+  //     "expenses": [
+  //         {
+  //             "id": 1,
+  //             "group_id": 5,
+  //             "title": "Hotel Booking - Bellagio",
+  //             "description": "3 nights at Bellagio Hotel for the group",
+  //             "amount": "1200.00",
+  //             "paid_by": 8,
+  //             "created_at": "2025-07-22T13:39:46.072+00:00",
+  //             "updated_at": "2025-07-22T13:39:46.072+00:00",
+  //             "expense_splits": [
+  //                 {
+  //                     "id": 69,
+  //                     "expense_id": 1,
+  //                     "user_id": 5,
+  //                     "amount_owed": "36.25",
+  //                     "created_at": "2025-07-22T13:40:22.704+00:00",
+  //                     "updated_at": "2025-07-22T13:40:22.704+00:00"
+  //                 },
+  //                 {
+  //                     "id": 70,
+  //                     "expense_id": 1,
+  //                     "user_id": 1,
+  //                     "amount_owed": "36.25",
+  //                     "created_at": "2025-07-22T13:40:22.988+00:00",
+  //                     "updated_at": "2025-07-22T13:40:22.988+00:00"
+  //                 },
+  //                 {
+  //                     "id": 71,
+  //                     "expense_id": 1,
+  //                     "user_id": 3,
+  //                     "amount_owed": "36.25",
+  //                     "created_at": "2025-07-22T13:40:23.256+00:00",
+  //                     "updated_at": "2025-07-22T13:40:23.256+00:00"
+  //                 },
+  //                 {
+  //                     "id": 72,
+  //                     "expense_id": 1,
+  //                     "user_id": 8,
+  //                     "amount_owed": "36.25",
+  //                     "created_at": "2025-07-22T13:40:23.546+00:00",
+  //                     "updated_at": "2025-07-22T13:40:23.546+00:00"
+  //                 }
+  //             ]
+  //         },
+  //         {
+  //             "id": 2,
+  //             "group_id": 5,
+  //             "title": "Dinner at Gordon Ramsay Steak",
+  //             "description": "Group dinner at the famous steakhouse",
+  //             "amount": "450.00",
+  //             "paid_by": 7,
+  //             "created_at": "2025-07-22T13:39:46.372+00:00",
+  //             "updated_at": "2025-07-22T13:39:46.372+00:00",
+  //             "expense_splits": [
+  //                 {
+  //                     "id": 65,
+  //                     "expense_id": 2,
+  //                     "user_id": 5,
+  //                     "amount_owed": "45.00",
+  //                     "created_at": "2025-07-22T13:40:21.434+00:00",
+  //                     "updated_at": "2025-07-22T13:40:21.434+00:00"
+  //                 },
+  //                 {
+  //                     "id": 66,
+  //                     "expense_id": 2,
+  //                     "user_id": 1,
+  //                     "amount_owed": "45.00",
+  //                     "created_at": "2025-07-22T13:40:21.718+00:00",
+  //                     "updated_at": "2025-07-22T13:40:21.718+00:00"
+  //                 },
+  //                 {
+  //                     "id": 67,
+  //                     "expense_id": 2,
+  //                     "user_id": 3,
+  //                     "amount_owed": "45.00",
+  //                     "created_at": "2025-07-22T13:40:21.977+00:00",
+  //                     "updated_at": "2025-07-22T13:40:21.977+00:00"
+  //                 },
+  //                 {
+  //                     "id": 68,
+  //                     "expense_id": 2,
+  //                     "user_id": 8,
+  //                     "amount_owed": "45.00",
+  //                     "created_at": "2025-07-22T13:40:22.398+00:00",
+  //                     "updated_at": "2025-07-22T13:40:22.398+00:00"
+  //                 }
+  //             ]
+  //         },
+  //         {
+  //             "id": 3,
+  //             "group_id": 5,
+  //             "title": "Show Tickets - Cirque du Soleil",
+  //             "description": "Tickets for \"O\" show at Bellagio",
+  //             "amount": "600.00",
+  //             "paid_by": 6,
+  //             "created_at": "2025-07-22T13:39:46.634+00:00",
+  //             "updated_at": "2025-07-22T13:39:46.634+00:00",
+  //             "expense_splits": [
+  //                 {
+  //                     "id": 61,
+  //                     "expense_id": 3,
+  //                     "user_id": 5,
+  //                     "amount_owed": "80.00",
+  //                     "created_at": "2025-07-22T13:40:20.347+00:00",
+  //                     "updated_at": "2025-07-22T13:40:20.347+00:00"
+  //                 },
+  //                 {
+  //                     "id": 62,
+  //                     "expense_id": 3,
+  //                     "user_id": 1,
+  //                     "amount_owed": "80.00",
+  //                     "created_at": "2025-07-22T13:40:20.618+00:00",
+  //                     "updated_at": "2025-07-22T13:40:20.618+00:00"
+  //                 },
+  //                 {
+  //                     "id": 63,
+  //                     "expense_id": 3,
+  //                     "user_id": 3,
+  //                     "amount_owed": "80.00",
+  //                     "created_at": "2025-07-22T13:40:20.896+00:00",
+  //                     "updated_at": "2025-07-22T13:40:20.896+00:00"
+  //                 },
+  //                 {
+  //                     "id": 64,
+  //                     "expense_id": 3,
+  //                     "user_id": 8,
+  //                     "amount_owed": "80.00",
+  //                     "created_at": "2025-07-22T13:40:21.155+00:00",
+  //                     "updated_at": "2025-07-22T13:40:21.155+00:00"
+  //                 }
+  //             ]
+  //         },
+  //         {
+  //             "id": 4,
+  //             "group_id": 5,
+  //             "title": "Uber Rides",
+  //             "description": "Transportation around Vegas",
+  //             "amount": "180.00",
+  //             "paid_by": 5,
+  //             "created_at": "2025-07-22T13:39:46.881+00:00",
+  //             "updated_at": "2025-07-22T13:39:46.881+00:00",
+  //             "expense_splits": [
+  //                 {
+  //                     "id": 56,
+  //                     "expense_id": 4,
+  //                     "user_id": 4,
+  //                     "amount_owed": "17.00",
+  //                     "created_at": "2025-07-22T13:40:18.916+00:00",
+  //                     "updated_at": "2025-07-22T13:40:18.916+00:00"
+  //                 },
+  //                 {
+  //                     "id": 57,
+  //                     "expense_id": 4,
+  //                     "user_id": 1,
+  //                     "amount_owed": "17.00",
+  //                     "created_at": "2025-07-22T13:40:19.191+00:00",
+  //                     "updated_at": "2025-07-22T13:40:19.191+00:00"
+  //                 },
+  //                 {
+  //                     "id": 58,
+  //                     "expense_id": 4,
+  //                     "user_id": 2,
+  //                     "amount_owed": "17.00",
+  //                     "created_at": "2025-07-22T13:40:19.505+00:00",
+  //                     "updated_at": "2025-07-22T13:40:19.505+00:00"
+  //                 },
+  //                 {
+  //                     "id": 59,
+  //                     "expense_id": 4,
+  //                     "user_id": 6,
+  //                     "amount_owed": "17.00",
+  //                     "created_at": "2025-07-22T13:40:19.771+00:00",
+  //                     "updated_at": "2025-07-22T13:40:19.771+00:00"
+  //                 },
+  //                 {
+  //                     "id": 60,
+  //                     "expense_id": 4,
+  //                     "user_id": 7,
+  //                     "amount_owed": "17.00",
+  //                     "created_at": "2025-07-22T13:40:20.062+00:00",
+  //                     "updated_at": "2025-07-22T13:40:20.062+00:00"
+  //                 }
+  //             ]
+  //         }
+  //     ]
+  // }
   // Mock data - replace with real data from backend
-  const group = {
-    id: props.group.id,
-    name: props.group.name,
-    description: props.group.description,
-    currency: 'USD',
-    createdAt: props.group.created_at,
-    totalExpenses: props.expenses.reduce((acc, expense) => acc + expense.amount, 0),
-    members: props.group_members.map((member) => ({
-      id: member.id,
-      name: member.nickname,
-      // email: member.user.email,
-      // balance: member.amount_owed,
-      // avatar: member.user.avatar || 'SC',
-    })),
-    expenses: [
-      {
-        id: 1,
-        title: 'Hotel Booking',
-        amount: 450.0,
-        paidBy: 'Sophia Carter',
-        category: 'accommodation',
-        date: '2024-01-20',
-        description: '3 nights at Miami Beach Hotel',
-      },
-      {
-        id: 2,
-        title: 'Dinner at Italian Restaurant',
-        amount: 180.5,
-        paidBy: 'John Doe',
-        category: 'food',
-        date: '2024-01-21',
-        description: 'Group dinner on first night',
-      },
-      {
-        id: 3,
-        title: 'Car Rental',
-        amount: 320.0,
-        paidBy: 'Jane Smith',
-        category: 'transport',
-        date: '2024-01-22',
-        description: 'SUV rental for the weekend',
-      },
-      {
-        id: 4,
-        title: 'Beach Activities',
-        amount: 150.0,
-        paidBy: 'Sarah Wilson',
-        category: 'entertainment',
-        date: '2024-01-23',
-        description: 'Jet ski and parasailing',
-      },
-      {
-        id: 5,
-        title: 'Groceries',
-        amount: 150.0,
-        paidBy: 'Tom Brown',
-        category: 'food',
-        date: '2024-01-24',
-        description: 'Food and drinks for the trip',
-      },
-    ],
-  }
+  const group = useMemo(
+    () => ({
+      id: props.group.id,
+      name: props.group.name,
+      description: props.group.description,
+      currency: 'NGN',
+      createdAt: props.group.created_at,
+      totalExpenses: props.expenses.reduce((acc, expense) => acc + Number(expense.amount), 0),
+      members: props.group_members.map((member: any) => ({
+        id: member.id,
+        name: member.nickname,
+        // email: member.user.email,
+        // balance: member.amount_owed,
+        // avatar: member.user.avatar || 'SC',
+      })),
+      expenses: props.expenses,
+    }),
+    [props.group, props.expenses, props.group_members]
+  )
 
   const handleAddExpense = () => {
     router.visit(`/groups/${group.id}/expenses/create`)
@@ -78,26 +301,6 @@ export default function GroupDetail(props: { group: Group; user: any }) {
 
   const handleBackToGroups = () => {
     router.visit('/groups')
-  }
-
-  const handleSettleBalance = (memberId: number, amount: number) => {
-    router.visit(`/groups/${group.id}/settle`, {
-      data: {
-        memberId,
-        amount: Math.abs(amount),
-        recipient: group.members.find((m) => m.id === memberId)?.name,
-      },
-    })
-  }
-
-  const handleRequestPayment = (memberId: number, amount: number) => {
-    router.visit(`/groups/${group.id}/request-payment`, {
-      data: {
-        memberId,
-        amount: Math.abs(amount),
-        recipient: group.members.find((m) => m.id === memberId)?.name,
-      },
-    })
   }
 
   const getCategoryIcon = (category: string) => {
@@ -146,13 +349,17 @@ export default function GroupDetail(props: { group: Group; user: any }) {
             </div>
 
             {/* Group Stats */}
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="bg-white rounded-2xl shadow-sm p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Total Expenses</p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      ${group.totalExpenses.toFixed(2)}
+                    <p
+                      className={`text-2xl font-bold text-gray-800 ${
+                        group.totalExpenses > 0 ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
+                      {group.totalExpenses > 0 ? '+ ' : ''} NGN{group.totalExpenses.toFixed(2)}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg flex items-center justify-center">
@@ -191,35 +398,6 @@ export default function GroupDetail(props: { group: Group; user: any }) {
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-sm p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Your Balance</p>
-                    <p
-                      className={`text-2xl font-bold ${group.members?.[0]?.balance > 0 ? 'text-green-600' : group.members?.[0]?.balance < 0 ? 'text-red-600' : 'text-gray-800'}`}
-                    >
-                      {group.members?.[0]?.balance > 0 ? '+' : ''}$
-                      {group.members?.[0]?.balance?.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                       />
                     </svg>
                   </div>
@@ -284,16 +462,6 @@ export default function GroupDetail(props: { group: Group; user: any }) {
                 >
                   Members
                 </button>
-                <button
-                  onClick={() => setActiveTab('balances')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'balances'
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Balances
-                </button>
               </nav>
             </div>
 
@@ -301,28 +469,57 @@ export default function GroupDetail(props: { group: Group; user: any }) {
               {/* Expenses Tab */}
               {activeTab === 'expenses' && (
                 <div className="space-y-4">
-                  {group.expenses.map((expense) => (
-                    <div
-                      key={expense.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
-                          {getCategoryIcon(expense.category)}
+                  {group.expenses.length > 0 ? (
+                    group.expenses.map((expense: any) => {
+                      // Find who paid for this expense
+                      const paidByMember = group.members.find(
+                        (member) => member.id === expense.paid_by
+                      )
+
+                      return (
+                        <div
+                          key={expense.id}
+                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
+                              {getCategoryIcon('general')}
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gray-800">{expense.title}</h3>
+                              <p className="text-sm text-gray-600">{expense.description}</p>
+                              <p className="text-xs text-gray-500">
+                                Paid by {paidByMember?.name || 'Unknown'} •{' '}
+                                {new Date(expense.created_at.toString()).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <div className="text-right">
+                              <p className="font-bold text-gray-800">
+                                NGN {Number(expense.amount).toFixed(2)}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {expense.expense_splits?.length || 0} splits
+                              </p>
+                            </div>
+                            <button
+                              onClick={() =>
+                                router.visit(`/groups/${group.id}/expenses/${expense.id}`)
+                              }
+                              className="px-4 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors font-medium text-sm"
+                            >
+                              View Details
+                            </button>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium text-gray-800">{expense.title}</h3>
-                          <p className="text-sm text-gray-600">{expense.description}</p>
-                          <p className="text-xs text-gray-500">
-                            Paid by {expense.paidBy} • {expense.date}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-800">${expense.amount.toFixed(2)}</p>
-                      </div>
+                      )
+                    })
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No expenses yet. Add your first expense!</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
 
@@ -335,64 +532,13 @@ export default function GroupDetail(props: { group: Group; user: any }) {
                       className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
                     >
                       <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">{member.avatar}</span>
+                        <span className="text-white text-sm font-medium">
+                          {member.name.charAt(0)}
+                        </span>
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800">{member.name}</h3>
-                        <p className="text-sm text-gray-600">{member.email}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Balances Tab */}
-              {activeTab === 'balances' && (
-                <div className="space-y-4">
-                  {group.members.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">{member.avatar}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-800">{member.name}</h3>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <p
-                            className={`font-bold ${member.balance > 0 ? 'text-green-600' : member.balance < 0 ? 'text-red-600' : 'text-gray-600'}`}
-                          >
-                            {member.balance > 0 ? '+' : ''}${member?.balance?.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {member.balance > 0
-                              ? 'Owes you'
-                              : member.balance < 0
-                                ? 'You owe'
-                                : 'Settled up'}
-                          </p>
-                        </div>
-                        {member.balance !== 0 && (
-                          <button
-                            onClick={() =>
-                              member.balance > 0
-                                ? handleRequestPayment(member.id, member.balance)
-                                : handleSettleBalance(member.id, member.balance)
-                            }
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              member.balance > 0
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                : 'bg-red-100 text-red-700 hover:bg-red-200'
-                            }`}
-                          >
-                            {member.balance > 0 ? 'Request' : 'Settle'}
-                          </button>
-                        )}
+                        {/* <p className="text-sm text-gray-600">{member.email}</p> */}
                       </div>
                     </div>
                   ))}

@@ -1,10 +1,18 @@
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
+import User from '#models/user'
+import Expense from '#models/expense'
+import Group from '#models/group'
+import ExpenseSplit from '#models/expense_split'
 
-export default function RequestPayment(props: { user: any }) {
-  const { user } = props
+export default function RequestPayment(props: {
+  user: User
+  expenseSplit: ExpenseSplit
+  group: Group
+  members: any[]
+}) {
   const [isSending, setIsSending] = useState(false)
   const [emailData, setEmailData] = useState({
     recipientEmail: '',
@@ -13,16 +21,23 @@ export default function RequestPayment(props: { user: any }) {
     paymentLink: '',
   })
 
-  // Mock data - replace with real data from backend
-  const request = {
-    groupId: 1,
-    groupName: 'Weekend Trip to Miami',
-    amount: 120.5,
-    currency: 'USD',
-    recipient: 'John Doe',
-    recipientEmail: 'john@example.com',
-    description: 'Settlement for Weekend Trip to Miami',
-  }
+  // Process the data from props
+  const request = useMemo(() => {
+    const amount = Number(props.expenseSplit.amount_owed)
+    const recipient = props.members.find((m) => m.user_id === props.expenseSplit.user_id)
+    const recipientName = recipient?.nickname || 'Unknown'
+
+    return {
+      groupId: props.group.id,
+      groupName: props.group.name,
+      amount,
+      currency: 'NGN',
+      recipient: recipientName,
+      recipientId: props.expenseSplit.user_id,
+      description: `Payment request for ${props.group.name}`,
+      expenseSplitId: props.expenseSplit.id,
+    }
+  }, [props.expenseSplit, props.group, props.members])
 
   const handleSendRequest = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,13 +53,16 @@ export default function RequestPayment(props: { user: any }) {
         message: emailData.message,
         paymentLink: emailData.paymentLink,
         groupName: request.groupName,
+        expenseSplitId: request.expenseSplitId,
       })
 
       // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       // Mock successful email send
-      alert('Payment request sent successfully! John will receive an email with the payment link.')
+      alert(
+        `Payment request sent successfully! ${request.recipient} will receive an email with the payment link.`
+      )
       router.visit(`/groups/${request.groupId}`)
     } catch (error) {
       alert('Failed to send payment request. Please try again.')
@@ -58,7 +76,7 @@ export default function RequestPayment(props: { user: any }) {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: request.currency,
     }).format(amount)
@@ -66,8 +84,25 @@ export default function RequestPayment(props: { user: any }) {
 
   const generatePaymentLink = () => {
     // Mock payment link generation
-    const link = `https://splitx.com/pay/${request.groupId}/${request.recipient}?amount=${request.amount}&currency=${request.currency}`
+    const link = `https://splitx.com/pay/${request.groupId}/${request.expenseSplitId}?amount=${request.amount}&currency=${request.currency}`
     setEmailData({ ...emailData, paymentLink: link })
+  }
+
+  const handleExport = () => {
+    console.log('Exporting payment summary')
+    router.visit(`/groups/${request.groupId}/summary`, {
+      data: {
+        expenseSplitId: request.expenseSplitId,
+      },
+    })
+  }
+  const handleShare = () => {
+    console.log('Sharing payment link')
+    router.visit(`/groups/${request.groupId}/share`, {
+      data: {
+        expenseSplitId: request.expenseSplitId,
+      },
+    })
   }
 
   return (
@@ -75,7 +110,7 @@ export default function RequestPayment(props: { user: any }) {
       <Head title="Request Payment - SplitX" />
 
       <div className="min-h-screen bg-gray-50">
-        <Header auth={user} />
+        <Header auth={props.user} />
 
         {/* Main Content */}
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -146,8 +181,7 @@ export default function RequestPayment(props: { user: any }) {
                   value={emailData.recipientEmail}
                   onChange={(e) => setEmailData({ ...emailData, recipientEmail: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                  placeholder="john@example.com"
-                  defaultValue={request.recipientEmail}
+                  placeholder="recipient@example.com"
                 />
               </div>
 
@@ -165,7 +199,7 @@ export default function RequestPayment(props: { user: any }) {
                   value={emailData.recipientName}
                   onChange={(e) => setEmailData({ ...emailData, recipientName: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                  placeholder="John Doe"
+                  placeholder="Recipient Name"
                   defaultValue={request.recipient}
                 />
               </div>
@@ -180,7 +214,7 @@ export default function RequestPayment(props: { user: any }) {
                   value={emailData.message}
                   onChange={(e) => setEmailData({ ...emailData, message: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                  placeholder="Hey John, could you please settle your balance for our Miami trip? Thanks!"
+                  placeholder={`Hey ${request.recipient}, could you please settle your balance for ${request.groupName}? Thanks!`}
                 />
               </div>
 
@@ -324,7 +358,10 @@ export default function RequestPayment(props: { user: any }) {
                     <p className="text-sm text-gray-600">Download PDF with payment details</p>
                   </div>
                 </div>
-                <button className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors">
+                <button
+                  className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
+                  onClick={handleExport}
+                >
                   Export
                 </button>
               </div>
@@ -349,7 +386,10 @@ export default function RequestPayment(props: { user: any }) {
                     <p className="text-sm text-gray-600">Share directly via WhatsApp, SMS, etc.</p>
                   </div>
                 </div>
-                <button className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors">
+                <button
+                  className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
+                  onClick={handleShare}
+                >
                   Share
                 </button>
               </div>
