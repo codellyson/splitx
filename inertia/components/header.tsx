@@ -84,7 +84,7 @@ export default function Header({ auth, className = '' }: HeaderProps) {
                   Log in
                 </Link>
                 <Link
-                  href="/register"
+                  href="/auth"
                   className="px-4 py-2 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors"
                 >
                   Sign up
