@@ -525,23 +525,49 @@ export default function GroupDetail(props: {
 
               {/* Members Tab */}
               {activeTab === 'members' && (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {group.members.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                <div>
+                  {/* Invite Button */}
+                  <div className="mb-6">
+                    <button
+                      onClick={() => router.visit(`/groups/${group.id}/invite`)}
+                      className="inline-flex items-center space-x-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors font-medium"
                     >
-                      <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {member.name.charAt(0)}
-                        </span>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                      <span>Invite Members</span>
+                    </button>
+                  </div>
+
+                  {/* Members Grid */}
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {group.members.map((member) => (
+                      <div
+                        key={member.id}
+                        className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                      >
+                        <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-medium">
+                            {member.name.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-800">{member.name}</h3>
+                          {/* <p className="text-sm text-gray-600">{member.email}</p> */}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">{member.name}</h3>
-                        {/* <p className="text-sm text-gray-600">{member.email}</p> */}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

@@ -1,11 +1,12 @@
 import { Head, router } from '@inertiajs/react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
 import User from '#models/user'
 import Expense from '#models/expense'
 import Group from '#models/group'
 import ExpenseSplit from '#models/expense_split'
+import env from '#start/env'
 
 export default function RequestPayment(props: {
   user: User
@@ -45,7 +46,7 @@ export default function RequestPayment(props: {
 
     try {
       // Mock email sending with payment link
-      console.log('Sending payment request:', {
+      const data = {
         recipientEmail: emailData.recipientEmail,
         recipientName: emailData.recipientName,
         amount: request.amount,
@@ -54,16 +55,22 @@ export default function RequestPayment(props: {
         paymentLink: emailData.paymentLink,
         groupName: request.groupName,
         expenseSplitId: request.expenseSplitId,
-      })
+      }
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Mock successful email send
-      alert(
-        `Payment request sent successfully! ${request.recipient} will receive an email with the payment link.`
+      router.post(
+        '/groups/request-payment',
+        {
+          data,
+        },
+        {
+          onSuccess: () => {
+            router.visit(`/groups/${request.groupId}`)
+          },
+          onError: () => {
+            alert('Failed to send payment request. Please try again.')
+          },
+        }
       )
-      router.visit(`/groups/${request.groupId}`)
     } catch (error) {
       alert('Failed to send payment request. Please try again.')
     } finally {
@@ -83,8 +90,7 @@ export default function RequestPayment(props: {
   }
 
   const generatePaymentLink = () => {
-    // Mock payment link generation
-    const link = `https://splitx.com/pay/${request.groupId}/${request.expenseSplitId}?amount=${request.amount}&currency=${request.currency}`
+    const link = `http://localhost:3333/groups/${request.groupId}/settle/${request.expenseSplitId}?amount=${request.amount}&currency=${request.currency}`
     setEmailData({ ...emailData, paymentLink: link })
   }
 
@@ -104,6 +110,25 @@ export default function RequestPayment(props: {
       },
     })
   }
+
+  useEffect(() => {
+    if (props.user) {
+      const getDataFromUrl = new URLSearchParams(window.location.search)
+
+      const recipientEmail = getDataFromUrl.get('recipientEmail')
+      const recipientName = getDataFromUrl.get('recipient')
+      const message = getDataFromUrl.get('message')
+
+      setEmailData({
+        recipientEmail: recipientEmail || props.user.email,
+        recipientName: recipientName || props.user.full_name || props.user.email || 'Unknown',
+        message:
+          message ||
+          `Hey ${recipientName}, could you please settle your balance for ${request.groupName}? Thanks!`,
+        paymentLink: '',
+      })
+    }
+  }, [props.user])
 
   return (
     <>

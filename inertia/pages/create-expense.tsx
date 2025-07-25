@@ -2,30 +2,27 @@ import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
 import Header from '../components/header'
 import Footer from '../components/footer'
+import User from '#models/user'
+import GroupMember from '#models/group_member'
+import Group from '#models/group'
 
-export default function CreateExpense() {
+export default function CreateExpense({
+  user,
+  group,
+  groupMembers,
+}: {
+  user: User
+  group: Group
+  groupMembers: GroupMember[]
+}) {
   const [expenseData, setExpenseData] = useState({
     title: '',
     amount: '',
     description: '',
     paidBy: '',
     splitType: 'equal', // equal, percentage, custom
-    category: 'general'
+    category: 'general',
   })
-
-  // Mock group data - replace with real data from backend
-  const group = {
-    id: 1,
-    name: 'Weekend Trip to Miami',
-    members: [
-      { id: 1, name: 'Sophia Carter', email: 'sophia@example.com' },
-      { id: 2, name: 'John Doe', email: 'john@example.com' },
-      { id: 3, name: 'Jane Smith', email: 'jane@example.com' },
-      { id: 4, name: 'Mike Johnson', email: 'mike@example.com' },
-      { id: 5, name: 'Sarah Wilson', email: 'sarah@example.com' },
-      { id: 6, name: 'Tom Brown', email: 'tom@example.com' }
-    ]
-  }
 
   const categories = [
     { value: 'general', label: 'General' },
@@ -35,15 +32,13 @@ export default function CreateExpense() {
     { value: 'entertainment', label: 'Entertainment' },
     { value: 'utilities', label: 'Utilities' },
     { value: 'rent', label: 'Rent' },
-    { value: 'other', label: 'Other' }
+    { value: 'other', label: 'Other' },
   ]
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Handle form submission here
-    console.log('Expense data:', expenseData)
-    // Navigate back to group detail page
-    router.visit(`/groups/${group.id}`)
+    router.post(`/groups/${group.id}/expenses/create`, expenseData)
   }
 
   const handleCancel = () => {
@@ -55,7 +50,7 @@ export default function CreateExpense() {
       <Head title="Add Expense - SplitX" />
 
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <Header auth={user} />
 
         {/* Main Content */}
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -67,7 +62,12 @@ export default function CreateExpense() {
                 className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
               </button>
               <div>
@@ -103,7 +103,9 @@ export default function CreateExpense() {
                   Amount *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
                   <input
                     type="number"
                     id="amount"
@@ -121,7 +123,10 @@ export default function CreateExpense() {
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Description (Optional)
                 </label>
                 <textarea
@@ -169,9 +174,9 @@ export default function CreateExpense() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                 >
                   <option value="">Select who paid</option>
-                  {group.members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
+                  {groupMembers.map((member) => (
+                    <option key={member.user_id} value={member.user_id}>
+                      {member.nickname || member.user.full_name}
                     </option>
                   ))}
                 </select>
@@ -198,9 +203,18 @@ export default function CreateExpense() {
               {/* Split Type Description */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-600">
-                  {expenseData.splitType === 'equal' && 'The expense will be split equally among all group members.'}
-                  {expenseData.splitType === 'percentage' && 'You can set different percentages for each member.'}
-                  {expenseData.splitType === 'custom' && 'You can set custom amounts for each member.'}
+                  {(() => {
+                    switch (expenseData.splitType) {
+                      case 'equal':
+                        return 'The expense will be split equally among all group members.'
+                      case 'percentage':
+                        return 'You can set different percentages for each member.'
+                      case 'custom':
+                        return 'You can set custom amounts for each member.'
+                      default:
+                        return 'Select a split type to see description.'
+                    }
+                  })()}
                 </p>
               </div>
 

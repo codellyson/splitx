@@ -24,6 +24,12 @@ export default class Expense extends BaseModel {
   @column()
   declare paid_by: number
 
+  @column()
+  declare split_type: string
+
+  @column()
+  declare category: string
+
   @column.dateTime({ autoCreate: true })
   declare created_at: DateTime
 

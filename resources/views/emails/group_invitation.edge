@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      You're invited to join {{ group.name }} on SplitX
+    </title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        color: #222;
+      }
+
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 480px;
+        margin: 2rem auto;
+        box-shadow: 0 2px 8px #eee;
+      }
+
+      .btn {
+        display: inline-block;
+        background: #14b8a6;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 1.5rem;
+      }
+
+      .footer {
+        margin-top: 2rem;
+        font-size: 0.9em;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>
+        You're invited to join <span style="color:#14b8a6">{{ group.name }}</span>!
+      </h2>
+      <p>
+        Hello,
+      </p>
+      <p>
+        {{ invitedBy?.full_name || 'A friend' }} has invited you to join the group <b>{{ group.name }}</b>on SplitX.<br />
+        Click the button below to accept your invitation:
+      </p>
+      <a href="{{ inviteUrl }}" class="btn">Accept Invitation</a>
+      <p style="margin-top:1.5rem;">
+        If you did not expect this invitation, you can safely ignore this email.
+      </p>
+      <div class="footer">
+        &copy; {{ new Date().getFullYear() }} SplitX. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>

@@ -45,8 +45,8 @@ export default function Groups(props: { groups: Group[]; user: any }) {
   const groups = _groups.map((group) => ({
     ...group,
     members: group.group_members.length,
-    totalExpenses: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0) || 0,
-    yourBalance: group.group_members.reduce((acc, member) => acc + member.amount_owed, 0) || 0,
+    totalExpenses: group.expenses.reduce((acc, expense) => acc + expense.amount, 0) || 0,
+    yourBalance: 0,
     currency: 'USD',
     createdAt: group.created_at,
   }))
@@ -145,7 +145,13 @@ export default function Groups(props: { groups: Group[]; user: any }) {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-1">{group.name}</h3>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-xl font-bold text-gray-800 mb-1">{group.name}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                        {user.id === group.created_by ? 'Owner' : 'Member'}
+                        {user.id === group.created_by && ` (${group.group_members.length} members)`}
+                      </span>
+                    </div>
                     <p className="text-gray-600 text-sm">{group.description}</p>
                   </div>
                   <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-lg flex items-center justify-center">
@@ -184,20 +190,22 @@ export default function Groups(props: { groups: Group[]; user: any }) {
                   </div>
                 </div>
 
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleViewDetails(group.id)}
-                    className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                  >
-                    View Details
-                  </button>
-                  <button
-                    onClick={() => handleAddExpense(group.id)}
-                    className="flex-1 bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
-                  >
-                    Add Expense
-                  </button>
-                </div>
+                {user.id === group.created_by && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleViewDetails(group.id)}
+                      className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => handleAddExpense(group.id)}
+                      className="flex-1 bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
+                    >
+                      Add Expense
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

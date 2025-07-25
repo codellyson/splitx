@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react'
+import { Link, router } from '@inertiajs/react'
 
 interface HeaderProps {
   className?: string
@@ -62,12 +62,14 @@ export default function Header({ auth, className = '' }: HeaderProps) {
           <div className="flex items-center space-x-4">
             {auth ? (
               <>
-                <Link
-                  href="/auth/logout"
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                <button
+                  onClick={() => {
+                    router.post('/auth/logout')
+                  }}
+                  className="px-4 bg-red-100 cursor-pointer py-2 text-gray-700 hover:bg-red-200 rounded-lg transition-colors"
                 >
                   Log out
-                </Link>
+                </button>
                 <Link
                   href="/profile"
                   className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"

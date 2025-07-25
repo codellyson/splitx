@@ -166,9 +166,12 @@ export default function Auth() {
                         Remember me
                       </label>
                     </div>
-                    <a href="#" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+                    <button
+                      onClick={() => router.visit('/forgot-password')}
+                      className="text-sm text-teal-600 hover:text-teal-700 font-medium"
+                    >
                       Forgot password?
-                    </a>
+                    </button>
                   </div>
                 )}
 

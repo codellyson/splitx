@@ -5,12 +5,13 @@ import Footer from '../components/footer'
 import User from '#models/user'
 import Expense from '#models/expense'
 import Group from '#models/group'
+import GroupMember from '#models/group_member'
 
 export default function ExpenseDetail(props: {
   expense: Expense
   group: Group
   user: User
-  group_members: any[]
+  group_members: GroupMember[]
 }) {
   const expense = useMemo(
     () => ({
@@ -36,9 +37,10 @@ export default function ExpenseDetail(props: {
 
   const members = useMemo(
     () =>
-      props.group_members.map((member: any) => ({
+      props.group_members.map((member) => ({
         id: member.user_id,
-        name: member.nickname || member.name,
+        name: member.nickname,
+        email: member.user?.email,
       })),
     [props.group_members]
   )
@@ -48,12 +50,18 @@ export default function ExpenseDetail(props: {
     router.visit(`/groups/${group.id}`)
   }
 
-  const handleRequestExpenseSplit = (splitId: number, amount: number, recipientName: string) => {
+  const handleRequestExpenseSplit = (
+    splitId: number,
+    amount: number,
+    recipientName: string,
+    recipientEmail: string
+  ) => {
     router.visit(`/groups/${group.id}/request-payment/${splitId}`, {
       data: {
         splitId,
         amount,
         recipient: recipientName,
+        recipientEmail: recipientEmail,
         expenseId: expense.id,
         expenseTitle: expense.title,
       },
@@ -244,7 +252,8 @@ export default function ExpenseDetail(props: {
                               handleRequestExpenseSplit(
                                 split.id,
                                 amountOwed,
-                                paidByMember?.name || 'Unknown'
+                                paidByMember?.name || 'Unknown',
+                                paidByMember?.email || 'Unknown'
                               )
                             }
                             className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
