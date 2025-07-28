@@ -54,6 +54,12 @@ export default function Header({ auth, className = '' }: HeaderProps) {
                 >
                   Groups
                 </Link>
+                <Link
+                  href="/settlements"
+                  className="text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Settlements
+                </Link>
               </>
             )}
           </nav>

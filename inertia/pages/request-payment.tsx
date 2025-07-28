@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react'
 import { useState, useMemo, useEffect } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
+import ShareModal from '../components/share-modal'
 import User from '#models/user'
 import Expense from '#models/expense'
 import Group from '#models/group'
@@ -15,6 +16,7 @@ export default function RequestPayment(props: {
   members: any[]
 }) {
   const [isSending, setIsSending] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [emailData, setEmailData] = useState({
     recipientEmail: '',
     recipientName: '',
@@ -103,32 +105,24 @@ export default function RequestPayment(props: {
     })
   }
   const handleShare = () => {
-    console.log('Sharing payment link')
-    router.visit(`/groups/${request.groupId}/share`, {
-      data: {
-        expenseSplitId: request.expenseSplitId,
-      },
-    })
+    setShowShareModal(true)
   }
 
   useEffect(() => {
-    if (props.user) {
-      const getDataFromUrl = new URLSearchParams(window.location.search)
-
-      const recipientEmail = getDataFromUrl.get('recipientEmail')
-      const recipientName = getDataFromUrl.get('recipient')
-      const message = getDataFromUrl.get('message')
+    if (props.user && request) {
+      // Get the recipient details from the expense split data
+      const recipient = props.members.find((m) => m.user_id === request.recipientId)
+      const recipientEmail = recipient?.user?.email || ''
+      const recipientName = request.recipient
 
       setEmailData({
-        recipientEmail: recipientEmail || props.user.email,
-        recipientName: recipientName || props.user.full_name || props.user.email || 'Unknown',
-        message:
-          message ||
-          `Hey ${recipientName}, could you please settle your balance for ${request.groupName}? Thanks!`,
+        recipientEmail: recipientEmail,
+        recipientName: recipientName,
+        message: `Hey ${recipientName}, could you please settle your balance for ${request.groupName}? Thanks!`,
         paymentLink: '',
       })
     }
-  }, [props.user])
+  }, [props.user, request, props.members])
 
   return (
     <>
@@ -360,67 +354,83 @@ export default function RequestPayment(props: {
           </div>
 
           {/* Additional Options */}
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Additional Options</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <svg
-                    className="w-6 h-6 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  <div>
-                    <h4 className="font-medium text-gray-800">Export Payment Summary</h4>
-                    <p className="text-sm text-gray-600">Download PDF with payment details</p>
+          {props.group.created_by === props.user.id && (
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Additional Options</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <svg
+                      className="w-6 h-6 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <div>
+                      <h4 className="font-medium text-gray-800">Export Payment Summary</h4>
+                      <p className="text-sm text-gray-600">Download PDF with payment details</p>
+                    </div>
                   </div>
+                  <button
+                    className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
+                    onClick={handleExport}
+                  >
+                    Export
+                  </button>
                 </div>
-                <button
-                  className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
-                  onClick={handleExport}
-                >
-                  Export
-                </button>
-              </div>
 
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <svg
-                    className="w-6 h-6 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-                    />
-                  </svg>
-                  <div>
-                    <h4 className="font-medium text-gray-800">Share Payment Link</h4>
-                    <p className="text-sm text-gray-600">Share directly via WhatsApp, SMS, etc.</p>
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <svg
+                      className="w-6 h-6 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                      />
+                    </svg>
+                    <div>
+                      <h4 className="font-medium text-gray-800">Share Payment Link</h4>
+                      <p className="text-sm text-gray-600">
+                        Share directly via WhatsApp, SMS, etc.
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
+                    onClick={handleShare}
+                  >
+                    Share
+                  </button>
                 </div>
-                <button
-                  className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
-                  onClick={handleShare}
-                >
-                  Share
-                </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
+
+        {/* Share Modal */}
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          shareLink={
+            emailData.paymentLink ||
+            `http://localhost:3333/groups/${request.groupId}/settle/${request.expenseSplitId}`
+          }
+          title={`Payment Request - ${request.groupName}`}
+          description={`You have an outstanding balance of ${formatCurrency(request.amount)} for the group "${request.groupName}". Please click the link below to settle your payment.`}
+        />
 
         <Footer />
       </div>

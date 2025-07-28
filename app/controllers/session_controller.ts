@@ -33,4 +33,41 @@ export default class SessionController {
     console.log(user)
     return inertia.render('profile', { user })
   }
+
+  async paymentSettings({ inertia, auth }: HttpContext) {
+    const user = await auth.use('web').authenticate()
+    return inertia.render('payment-settings', { user })
+  }
+
+  async updatePaymentSettings({ auth, request, response }: HttpContext) {
+    const user = await auth.use('web').authenticate()
+
+    const {
+      bankName,
+      accountNumber,
+      accountName,
+      paystackEnabled,
+      paystackAccountCode,
+      preferredPaymentMethod,
+    } = request.only([
+      'bankName',
+      'accountNumber',
+      'accountName',
+      'paystackEnabled',
+      'paystackAccountCode',
+      'preferredPaymentMethod',
+    ])
+
+    // Update user payment settings
+    user.bank_name = bankName
+    user.account_number = accountNumber
+    user.account_name = accountName
+    user.paystack_enabled = paystackEnabled
+    user.paystack_account_code = paystackAccountCode
+    user.preferred_payment_method = preferredPaymentMethod
+
+    await user.save()
+
+    return response.redirect('/profile')
+  }
 }

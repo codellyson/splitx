@@ -15,7 +15,7 @@ export default function Footer({ className = '' }: FooterProps) {
             <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">Contact Us</a>
           </div>
           <div className="text-gray-600">
-            ©2024 SplitX. All rights reserved.
+            © 2024 SplitX. All rights reserved.
           </div>
         </div>
       </div>

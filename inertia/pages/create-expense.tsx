@@ -24,6 +24,14 @@ export default function CreateExpense({
     category: 'general',
   })
 
+  const [splits, setSplits] = useState<
+    Array<{
+      user_id: number
+      amount?: number
+      percentage?: number
+    }>
+  >([])
+
   const categories = [
     { value: 'general', label: 'General' },
     { value: 'food', label: 'Food & Dining' },
@@ -35,10 +43,80 @@ export default function CreateExpense({
     { value: 'other', label: 'Other' },
   ]
 
+  // Initialize splits when split type changes
+  const initializeSplits = (splitType: string) => {
+    if (splitType === 'equal') {
+      setSplits([])
+      return
+    }
+
+    const expenseAmount = parseFloat(expenseData.amount) || 0
+    const memberCount = groupMembers.length
+
+    const newSplits = groupMembers.map((member) => ({
+      user_id: member.user_id,
+      amount: splitType === 'custom' ? expenseAmount / memberCount : undefined,
+      percentage: splitType === 'percentage' ? 100 / memberCount : undefined,
+    }))
+    setSplits(newSplits)
+  }
+
+  // Handle split type change
+  const handleSplitTypeChange = (splitType: string) => {
+    setExpenseData({ ...expenseData, splitType })
+    initializeSplits(splitType)
+  }
+
+  // Handle split value changes
+  const handleSplitChange = (index: number, field: 'amount' | 'percentage', value: number) => {
+    const newSplits = [...splits]
+    newSplits[index] = { ...newSplits[index], [field]: value }
+    setSplits(newSplits)
+  }
+
+  // Calculate total for validation
+  const calculateTotal = () => {
+    if (expenseData.splitType === 'percentage') {
+      return splits.reduce((sum, split) => sum + (split.percentage || 0), 0)
+    }
+    if (expenseData.splitType === 'custom') {
+      return splits.reduce((sum, split) => sum + (split.amount || 0), 0)
+    }
+    return 0
+  }
+
+  // Validate splits
+  const validateSplits = () => {
+    if (expenseData.splitType === 'equal') return true
+
+    const total = calculateTotal()
+    const expenseAmount = parseFloat(expenseData.amount) || 0
+
+    if (expenseData.splitType === 'percentage') {
+      return Math.abs(total - 100) < 0.01 // Allow small rounding errors
+    }
+
+    if (expenseData.splitType === 'custom') {
+      return Math.abs(total - expenseAmount) < 0.01 // Allow small rounding errors
+    }
+
+    return false
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
-    router.post(`/groups/${group.id}/expenses/create`, expenseData)
+
+    if (!validateSplits()) {
+      alert('Please ensure the splits add up correctly.')
+      return
+    }
+
+    const submitData = {
+      ...expenseData,
+      splits: expenseData.splitType !== 'equal' ? splits : undefined,
+    }
+
+    router.post(`/groups/${group.id}/expenses/create`, submitData)
   }
 
   const handleCancel = () => {
@@ -114,7 +192,21 @@ export default function CreateExpense({
                     step="0.01"
                     min="0"
                     value={expenseData.amount}
-                    onChange={(e) => setExpenseData({ ...expenseData, amount: e.target.value })}
+                    onChange={(e) => {
+                      const newAmount = e.target.value
+                      setExpenseData({ ...expenseData, amount: newAmount })
+
+                      // Update custom splits if amount changes
+                      if (expenseData.splitType === 'custom' && splits.length > 0) {
+                        const expenseAmount = parseFloat(newAmount) || 0
+                        const memberCount = groupMembers.length
+                        const newSplits = splits.map((split) => ({
+                          ...split,
+                          amount: expenseAmount / memberCount,
+                        }))
+                        setSplits(newSplits)
+                      }
+                    }}
                     className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                     placeholder="0.00"
                   />
@@ -191,7 +283,7 @@ export default function CreateExpense({
                   id="splitType"
                   name="splitType"
                   value={expenseData.splitType}
-                  onChange={(e) => setExpenseData({ ...expenseData, splitType: e.target.value })}
+                  onChange={(e) => handleSplitTypeChange(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                 >
                   <option value="equal">Split equally</option>
@@ -208,15 +300,125 @@ export default function CreateExpense({
                       case 'equal':
                         return 'The expense will be split equally among all group members.'
                       case 'percentage':
-                        return 'You can set different percentages for each member.'
+                        return 'You can set different percentages for each member. Total must equal 100%.'
                       case 'custom':
-                        return 'You can set custom amounts for each member.'
+                        return 'You can set custom amounts for each member. Total must equal the expense amount.'
                       default:
                         return 'Select a split type to see description.'
                     }
                   })()}
                 </p>
               </div>
+
+              {/* Split Configuration */}
+              {expenseData.splitType !== 'equal' && splits.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-800">Split Configuration</h3>
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const expenseAmount = parseFloat(expenseData.amount) || 0
+                          const memberCount = groupMembers.length
+                          const newSplits = groupMembers.map((member) => ({
+                            user_id: member.user_id,
+                            amount:
+                              expenseData.splitType === 'custom'
+                                ? expenseAmount / memberCount
+                                : undefined,
+                            percentage:
+                              expenseData.splitType === 'percentage'
+                                ? 100 / memberCount
+                                : undefined,
+                          }))
+                          setSplits(newSplits)
+                        }}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        {expenseData.splitType === 'percentage' ? 'Equal %' : 'Equal Amount'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {splits.map((split, index) => {
+                    const member = groupMembers.find((m) => m.user_id === split.user_id)
+                    const memberName = member?.nickname || member?.user.full_name || 'Unknown'
+
+                    return (
+                      <div
+                        key={split.user_id}
+                        className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {memberName}
+                          </label>
+                          {expenseData.splitType === 'percentage' ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value={split.percentage || 0}
+                                onChange={(e) =>
+                                  handleSplitChange(
+                                    index,
+                                    'percentage',
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                                placeholder="0"
+                              />
+                              <span className="text-gray-500">%</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-500">$</span>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={split.amount || 0}
+                                onChange={(e) =>
+                                  handleSplitChange(
+                                    index,
+                                    'amount',
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                                placeholder="0.00"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Total Validation */}
+                  <div
+                    className={`p-3 rounded-lg ${
+                      validateSplits()
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    <p
+                      className={`text-sm ${validateSplits() ? 'text-green-700' : 'text-red-700'}`}
+                    >
+                      {expenseData.splitType === 'percentage'
+                        ? `Total: ${calculateTotal().toFixed(2)}% ${validateSplits() ? '(✓ Valid)' : '(✗ Must equal 100%)'}`
+                        : expenseData.splitType === 'custom'
+                          ? `Total: $${calculateTotal().toFixed(2)} ${validateSplits() ? '(✓ Valid)' : `(✗ Must equal $${parseFloat(expenseData.amount || '0').toFixed(2)})`}`
+                          : ''}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex space-x-4 pt-6">
@@ -229,7 +431,8 @@ export default function CreateExpense({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors font-medium"
+                  disabled={!validateSplits()}
+                  className="flex-1 bg-teal-600 text-white py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Add Expense
                 </button>

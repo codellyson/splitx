@@ -28,6 +28,28 @@ export default class Settlement extends BaseModel {
   @column()
   declare note: string
 
+  // Payment status and tracking
+  @column()
+  declare status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+
+  @column()
+  declare payment_reference: string | null
+
+  @column()
+  declare transaction_id: string | null
+
+  @column.dateTime()
+  declare paid_at: DateTime | null
+
+  @column()
+  declare payment_notes: string | null
+
+  @column()
+  declare payment_type: 'manual' | 'automatic' | null
+
+  @column()
+  declare payment_link: string | null
+
   @column.dateTime({ autoCreate: true })
   declare created_at: DateTime
 
@@ -35,20 +57,20 @@ export default class Settlement extends BaseModel {
   declare updated_at: DateTime
 
   @belongsTo(() => Group, {
-    localKey: 'group_id',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'group_id',
   })
   declare group: relations.BelongsTo<typeof Group>
 
   @belongsTo(() => User, {
-    localKey: 'from_user',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'from_user',
   })
   declare fromUser: relations.BelongsTo<typeof User>
 
   @belongsTo(() => User, {
-    localKey: 'to_user',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'to_user',
   })
   declare toUser: relations.BelongsTo<typeof User>
 }

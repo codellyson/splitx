@@ -11,270 +11,11 @@ export default function GroupDetail(props: {
   user: User
   expenses: Expense[]
   group_members: any[]
+  settlements: any[]
 }) {
   console.log(props)
-  const [activeTab, setActiveTab] = useState('expenses') // expenses, members
+  const [activeTab, setActiveTab] = useState('expenses') // expenses, members, settlements
 
-  //   {
-  //     "user": {
-  //         "id": 4,
-  //         "full_name": "Emily Wilson",
-  //         "email": "emily@example.com",
-  //         "created_at": "2025-07-22T13:38:40.925+00:00",
-  //         "updated_at": "2025-07-22T13:38:40.925+00:00"
-  //     },
-  //     "group": {
-  //         "id": 5,
-  //         "name": "Road Trip to National Parks",
-  //         "description": "Gas, food, and camping expenses for our summer road trip",
-  //         "created_by": 4,
-  //         "created_at": "2025-07-22T13:38:58.259+00:00",
-  //         "updated_at": "2025-07-22T13:38:58.259+00:00"
-  //     },
-  //     "group_members": [
-  //         {
-  //             "id": 1,
-  //             "user_id": 8,
-  //             "group_id": 5,
-  //             "nickname": "John",
-  //             "joined_at": "2025-07-22T13:39:11.403+00:00",
-  //             "created_at": "2025-07-22T13:39:11.404+00:00",
-  //             "updated_at": "2025-07-22T13:39:11.404+00:00"
-  //         },
-  //         {
-  //             "id": 2,
-  //             "user_id": 7,
-  //             "group_id": 5,
-  //             "nickname": "Sarah",
-  //             "joined_at": "2025-07-22T13:39:11.698+00:00",
-  //             "created_at": "2025-07-22T13:39:11.698+00:00",
-  //             "updated_at": "2025-07-22T13:39:11.698+00:00"
-  //         },
-  //         {
-  //             "id": 3,
-  //             "user_id": 6,
-  //             "group_id": 5,
-  //             "nickname": "Mike",
-  //             "joined_at": "2025-07-22T13:39:11.977+00:00",
-  //             "created_at": "2025-07-22T13:39:11.977+00:00",
-  //             "updated_at": "2025-07-22T13:39:11.977+00:00"
-  //         },
-  //         {
-  //             "id": 4,
-  //             "user_id": 5,
-  //             "group_id": 5,
-  //             "nickname": "Emily",
-  //             "joined_at": "2025-07-22T13:39:12.239+00:00",
-  //             "created_at": "2025-07-22T13:39:12.239+00:00",
-  //             "updated_at": "2025-07-22T13:39:12.239+00:00"
-  //         },
-  //         {
-  //             "id": 5,
-  //             "user_id": 4,
-  //             "group_id": 5,
-  //             "nickname": "David",
-  //             "joined_at": "2025-07-22T13:39:12.526+00:00",
-  //             "created_at": "2025-07-22T13:39:12.526+00:00",
-  //             "updated_at": "2025-07-22T13:39:12.527+00:00"
-  //         },
-  //         {
-  //             "id": 6,
-  //             "user_id": 3,
-  //             "group_id": 5,
-  //             "nickname": "Lisa",
-  //             "joined_at": "2025-07-22T13:39:12.805+00:00",
-  //             "created_at": "2025-07-22T13:39:12.805+00:00",
-  //             "updated_at": "2025-07-22T13:39:12.805+00:00"
-  //         }
-  //     ],
-  //     "expenses": [
-  //         {
-  //             "id": 1,
-  //             "group_id": 5,
-  //             "title": "Hotel Booking - Bellagio",
-  //             "description": "3 nights at Bellagio Hotel for the group",
-  //             "amount": "1200.00",
-  //             "paid_by": 8,
-  //             "created_at": "2025-07-22T13:39:46.072+00:00",
-  //             "updated_at": "2025-07-22T13:39:46.072+00:00",
-  //             "expense_splits": [
-  //                 {
-  //                     "id": 69,
-  //                     "expense_id": 1,
-  //                     "user_id": 5,
-  //                     "amount_owed": "36.25",
-  //                     "created_at": "2025-07-22T13:40:22.704+00:00",
-  //                     "updated_at": "2025-07-22T13:40:22.704+00:00"
-  //                 },
-  //                 {
-  //                     "id": 70,
-  //                     "expense_id": 1,
-  //                     "user_id": 1,
-  //                     "amount_owed": "36.25",
-  //                     "created_at": "2025-07-22T13:40:22.988+00:00",
-  //                     "updated_at": "2025-07-22T13:40:22.988+00:00"
-  //                 },
-  //                 {
-  //                     "id": 71,
-  //                     "expense_id": 1,
-  //                     "user_id": 3,
-  //                     "amount_owed": "36.25",
-  //                     "created_at": "2025-07-22T13:40:23.256+00:00",
-  //                     "updated_at": "2025-07-22T13:40:23.256+00:00"
-  //                 },
-  //                 {
-  //                     "id": 72,
-  //                     "expense_id": 1,
-  //                     "user_id": 8,
-  //                     "amount_owed": "36.25",
-  //                     "created_at": "2025-07-22T13:40:23.546+00:00",
-  //                     "updated_at": "2025-07-22T13:40:23.546+00:00"
-  //                 }
-  //             ]
-  //         },
-  //         {
-  //             "id": 2,
-  //             "group_id": 5,
-  //             "title": "Dinner at Gordon Ramsay Steak",
-  //             "description": "Group dinner at the famous steakhouse",
-  //             "amount": "450.00",
-  //             "paid_by": 7,
-  //             "created_at": "2025-07-22T13:39:46.372+00:00",
-  //             "updated_at": "2025-07-22T13:39:46.372+00:00",
-  //             "expense_splits": [
-  //                 {
-  //                     "id": 65,
-  //                     "expense_id": 2,
-  //                     "user_id": 5,
-  //                     "amount_owed": "45.00",
-  //                     "created_at": "2025-07-22T13:40:21.434+00:00",
-  //                     "updated_at": "2025-07-22T13:40:21.434+00:00"
-  //                 },
-  //                 {
-  //                     "id": 66,
-  //                     "expense_id": 2,
-  //                     "user_id": 1,
-  //                     "amount_owed": "45.00",
-  //                     "created_at": "2025-07-22T13:40:21.718+00:00",
-  //                     "updated_at": "2025-07-22T13:40:21.718+00:00"
-  //                 },
-  //                 {
-  //                     "id": 67,
-  //                     "expense_id": 2,
-  //                     "user_id": 3,
-  //                     "amount_owed": "45.00",
-  //                     "created_at": "2025-07-22T13:40:21.977+00:00",
-  //                     "updated_at": "2025-07-22T13:40:21.977+00:00"
-  //                 },
-  //                 {
-  //                     "id": 68,
-  //                     "expense_id": 2,
-  //                     "user_id": 8,
-  //                     "amount_owed": "45.00",
-  //                     "created_at": "2025-07-22T13:40:22.398+00:00",
-  //                     "updated_at": "2025-07-22T13:40:22.398+00:00"
-  //                 }
-  //             ]
-  //         },
-  //         {
-  //             "id": 3,
-  //             "group_id": 5,
-  //             "title": "Show Tickets - Cirque du Soleil",
-  //             "description": "Tickets for \"O\" show at Bellagio",
-  //             "amount": "600.00",
-  //             "paid_by": 6,
-  //             "created_at": "2025-07-22T13:39:46.634+00:00",
-  //             "updated_at": "2025-07-22T13:39:46.634+00:00",
-  //             "expense_splits": [
-  //                 {
-  //                     "id": 61,
-  //                     "expense_id": 3,
-  //                     "user_id": 5,
-  //                     "amount_owed": "80.00",
-  //                     "created_at": "2025-07-22T13:40:20.347+00:00",
-  //                     "updated_at": "2025-07-22T13:40:20.347+00:00"
-  //                 },
-  //                 {
-  //                     "id": 62,
-  //                     "expense_id": 3,
-  //                     "user_id": 1,
-  //                     "amount_owed": "80.00",
-  //                     "created_at": "2025-07-22T13:40:20.618+00:00",
-  //                     "updated_at": "2025-07-22T13:40:20.618+00:00"
-  //                 },
-  //                 {
-  //                     "id": 63,
-  //                     "expense_id": 3,
-  //                     "user_id": 3,
-  //                     "amount_owed": "80.00",
-  //                     "created_at": "2025-07-22T13:40:20.896+00:00",
-  //                     "updated_at": "2025-07-22T13:40:20.896+00:00"
-  //                 },
-  //                 {
-  //                     "id": 64,
-  //                     "expense_id": 3,
-  //                     "user_id": 8,
-  //                     "amount_owed": "80.00",
-  //                     "created_at": "2025-07-22T13:40:21.155+00:00",
-  //                     "updated_at": "2025-07-22T13:40:21.155+00:00"
-  //                 }
-  //             ]
-  //         },
-  //         {
-  //             "id": 4,
-  //             "group_id": 5,
-  //             "title": "Uber Rides",
-  //             "description": "Transportation around Vegas",
-  //             "amount": "180.00",
-  //             "paid_by": 5,
-  //             "created_at": "2025-07-22T13:39:46.881+00:00",
-  //             "updated_at": "2025-07-22T13:39:46.881+00:00",
-  //             "expense_splits": [
-  //                 {
-  //                     "id": 56,
-  //                     "expense_id": 4,
-  //                     "user_id": 4,
-  //                     "amount_owed": "17.00",
-  //                     "created_at": "2025-07-22T13:40:18.916+00:00",
-  //                     "updated_at": "2025-07-22T13:40:18.916+00:00"
-  //                 },
-  //                 {
-  //                     "id": 57,
-  //                     "expense_id": 4,
-  //                     "user_id": 1,
-  //                     "amount_owed": "17.00",
-  //                     "created_at": "2025-07-22T13:40:19.191+00:00",
-  //                     "updated_at": "2025-07-22T13:40:19.191+00:00"
-  //                 },
-  //                 {
-  //                     "id": 58,
-  //                     "expense_id": 4,
-  //                     "user_id": 2,
-  //                     "amount_owed": "17.00",
-  //                     "created_at": "2025-07-22T13:40:19.505+00:00",
-  //                     "updated_at": "2025-07-22T13:40:19.505+00:00"
-  //                 },
-  //                 {
-  //                     "id": 59,
-  //                     "expense_id": 4,
-  //                     "user_id": 6,
-  //                     "amount_owed": "17.00",
-  //                     "created_at": "2025-07-22T13:40:19.771+00:00",
-  //                     "updated_at": "2025-07-22T13:40:19.771+00:00"
-  //                 },
-  //                 {
-  //                     "id": 60,
-  //                     "expense_id": 4,
-  //                     "user_id": 7,
-  //                     "amount_owed": "17.00",
-  //                     "created_at": "2025-07-22T13:40:20.062+00:00",
-  //                     "updated_at": "2025-07-22T13:40:20.062+00:00"
-  //                 }
-  //             ]
-  //         }
-  //     ]
-  // }
-  // Mock data - replace with real data from backend
   const group = useMemo(
     () => ({
       id: props.group.id,
@@ -282,6 +23,7 @@ export default function GroupDetail(props: {
       description: props.group.description,
       currency: 'NGN',
       createdAt: props.group.created_at,
+      created_by: props.group.created_by,
       totalExpenses: props.expenses.reduce((acc, expense) => acc + Number(expense.amount), 0),
       members: props.group_members.map((member: any) => ({
         id: member.id,
@@ -421,20 +163,22 @@ export default function GroupDetail(props: {
                 </svg>
                 <span>View Summary</span>
               </button>
-              <button
-                onClick={handleAddExpense}
-                className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors font-medium flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                <span>Add Expense</span>
-              </button>
+              {props.user.id === group.created_by && (
+                <button
+                  onClick={handleAddExpense}
+                  className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors font-medium flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <span>Add Expense</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -461,6 +205,16 @@ export default function GroupDetail(props: {
                   }`}
                 >
                   Members
+                </button>
+                <button
+                  onClick={() => setActiveTab('settlements')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'settlements'
+                      ? 'border-teal-500 text-teal-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Settlements
                 </button>
               </nav>
             </div>
@@ -518,6 +272,282 @@ export default function GroupDetail(props: {
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <p>No expenses yet. Add your first expense!</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Settlements Tab */}
+              {activeTab === 'settlements' && (
+                <div>
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Payment Status</h3>
+                    <p className="text-sm text-gray-600">
+                      Track pending and completed settlements for this group
+                    </p>
+                  </div>
+
+                  {/* Settlement Summary */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-yellow-800">Pending</p>
+                          <p className="text-2xl font-bold text-yellow-900">
+                            {props.expenses.reduce((total, expense) => {
+                              return (
+                                total +
+                                (expense.expense_splits?.filter(
+                                  (split) =>
+                                    split.user_id === props.user.id && Number(split.amount_owed) > 0
+                                ).length || 0)
+                              )
+                            }, 0)}
+                          </p>
+                        </div>
+                        <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-yellow-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-green-800">Completed</p>
+                          <p className="text-2xl font-bold text-green-900">
+                            {props.expenses.reduce((total, expense) => {
+                              return (
+                                total +
+                                (expense.expense_splits?.filter(
+                                  (split) =>
+                                    split.user_id === props.user.id &&
+                                    Number(split.amount_owed) === 0
+                                ).length || 0)
+                              )
+                            }, 0)}
+                          </p>
+                        </div>
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-green-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-blue-800">Total Owed</p>
+                          <p className="text-2xl font-bold text-blue-900">
+                            NGN{' '}
+                            {props.expenses
+                              .reduce((total, expense) => {
+                                return (
+                                  total +
+                                  (expense.expense_splits
+                                    ?.filter((split) => split.user_id === props.user.id)
+                                    .reduce(
+                                      (splitTotal, split) => splitTotal + Number(split.amount_owed),
+                                      0
+                                    ) || 0)
+                                )
+                              }, 0)
+                              .toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-blue-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pending Settlements */}
+                  <div className="space-y-4">
+                    <h4 className="text-md font-semibold text-gray-800">Pending Settlements</h4>
+                    {(() => {
+                      const pendingSettlements = props.expenses.flatMap(
+                        (expense) =>
+                          expense.expense_splits
+                            ?.filter(
+                              (split) =>
+                                split.user_id === props.user.id && Number(split.amount_owed) > 0
+                            )
+                            .map((split) => {
+                              const paidByMember = props.group_members.find(
+                                (member) => member.user_id === expense.paid_by
+                              )
+                              return (
+                                <div
+                                  key={split.id}
+                                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                                >
+                                  <div className="flex items-center space-x-4">
+                                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                      <svg
+                                        className="w-5 h-5 text-red-600"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                                        />
+                                      </svg>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-gray-800">{expense.title}</h5>
+                                      <p className="text-sm text-gray-600">
+                                        Owe to {paidByMember?.nickname || 'Unknown'}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        {new Date(
+                                          expense.created_at.toString()
+                                        ).toLocaleDateString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-3">
+                                    <div className="text-right">
+                                      <p className="font-bold text-red-600">
+                                        NGN {Number(split.amount_owed).toFixed(2)}
+                                      </p>
+                                      <p className="text-xs text-gray-500">Amount owed</p>
+                                    </div>
+                                    {split.user_id === props.user.id && (
+                                      <button
+                                        onClick={() =>
+                                          router.visit(`/groups/${group.id}/settle/${split.id}`)
+                                        }
+                                        className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
+                                      >
+                                        Settle Now
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            }) || []
+                      )
+
+                      return pendingSettlements.length > 0 ? (
+                        pendingSettlements
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No pending settlements! 🎉</p>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* Completed Settlements Section */}
+              {props.settlements && props.settlements.length > 0 && (
+                <div className="mt-8">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Recent Settlements</h3>
+                    <p className="text-sm text-gray-600">View completed payments and settlements</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {props.settlements.slice(0, 5).map((settlement) => (
+                      <div
+                        key={settlement.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-green-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-gray-800">
+                              {settlement.fromUser?.full_name || 'Unknown'} →{' '}
+                              {settlement.toUser?.full_name || 'Unknown'}
+                            </h5>
+                            <p className="text-sm text-gray-600">{settlement.note}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(settlement.created_at.toString()).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <div className="text-right">
+                            <p className="font-bold text-green-600">
+                              NGN {Number(settlement.amount).toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500 capitalize">{settlement.status}</p>
+                          </div>
+                          <button
+                            onClick={() => router.visit(`/settlements/${settlement.id}`)}
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {props.settlements.length > 5 && (
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => router.visit(`/groups/${group.id}/settlements`)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        View All Settlements ({props.settlements.length})
+                      </button>
                     </div>
                   )}
                 </div>

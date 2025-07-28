@@ -35,8 +35,8 @@ export default class GroupMember extends BaseModel {
   declare user: relations.BelongsTo<typeof User>
 
   @belongsTo(() => Group, {
-    localKey: 'group_id',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'group_id',
   })
   declare group: relations.BelongsTo<typeof Group>
 }

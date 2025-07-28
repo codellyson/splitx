@@ -26,14 +26,14 @@ export default class ExpenseSplits extends BaseModel {
   declare updated_at: DateTime
 
   @belongsTo(() => Expense, {
-    localKey: 'expense_id',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'expense_id',
   })
   declare expense: relations.BelongsTo<typeof Expense>
 
   @belongsTo(() => User, {
-    localKey: 'user_id',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'user_id',
   })
   declare user: relations.BelongsTo<typeof User>
 }

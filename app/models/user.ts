@@ -29,6 +29,25 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
+  // Payment-related fields
+  @column()
+  declare bank_name: string | null
+
+  @column()
+  declare account_number: string | null
+
+  @column()
+  declare account_name: string | null
+
+  @column()
+  declare paystack_account_code: string | null
+
+  @column()
+  declare paystack_enabled: boolean
+
+  @column()
+  declare preferred_payment_method: 'manual' | 'automatic' | 'both'
+
   @column.dateTime({ autoCreate: true })
   declare created_at: DateTime
 

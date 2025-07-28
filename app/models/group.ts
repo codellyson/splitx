@@ -28,8 +28,8 @@ export default class Group extends BaseModel {
   declare updated_at: DateTime
 
   @belongsTo(() => User, {
-    localKey: 'created_by',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'created_by',
   })
   declare createdByUser: relations.BelongsTo<typeof User>
 

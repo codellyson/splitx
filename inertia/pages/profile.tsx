@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
@@ -108,68 +108,200 @@ export default function Profile(props: { user: any }) {
 
           {/* Payment Methods */}
           <div className="bg-white rounded-2xl shadow-sm p-8 mb-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Payment Methods</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800">Payment Methods</h3>
+              <Link
+                href="/profile/payment-settings"
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-sm"
+              >
+                Configure Payment Settings
+              </Link>
+            </div>
 
             <div className="space-y-4">
-              {/* Card */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded flex items-center justify-center">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-white rounded-full opacity-80"></div>
-                      <div className="w-2 h-2 bg-white rounded-full opacity-60"></div>
+              {/* Bank Account */}
+              {user.bank_name && user.account_number ? (
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{user.bank_name}</p>
+                      <p className="text-sm text-gray-600">
+                        Account ending in {user.account_number.slice(-4)}
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-800">Card</p>
-                    <p className="text-sm text-gray-600">Debit card ending in 4567</p>
-                  </div>
-                </div>
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Bank Account */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Active
+                    </span>
+                    <Link
+                      href="/profile/payment-settings"
+                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">Bank Account</p>
-                    <p className="text-sm text-gray-600">Bank account ending in 8901</p>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </Link>
                   </div>
                 </div>
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                </button>
+              ) : (
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-8 bg-gray-200 rounded flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">Bank Account</p>
+                      <p className="text-sm text-gray-600">No bank account configured</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/profile/payment-settings"
+                    className="px-3 py-1 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors text-sm"
+                  >
+                    Add Bank Account
+                  </Link>
+                </div>
+              )}
+
+              {/* Paystack Account */}
+              {user.paystack_enabled && user.paystack_account_code ? (
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-8 bg-gradient-to-r from-green-500 to-teal-500 rounded flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">Paystack</p>
+                      <p className="text-sm text-gray-600">Automatic payments enabled</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                      Active
+                    </span>
+                    <Link
+                      href="/profile/payment-settings"
+                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-8 bg-gray-200 rounded flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">Automatic Payments</p>
+                      <p className="text-sm text-gray-600">Paystack not configured</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/profile/payment-settings"
+                    className="px-3 py-1 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors text-sm"
+                  >
+                    Enable
+                  </Link>
+                </div>
+              )}
+
+              {/* Payment Preferences */}
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-800">Payment Preferences</p>
+                    <p className="text-sm text-gray-600">
+                      Preferred method:{' '}
+                      {user.preferred_payment_method === 'both'
+                        ? 'Both options'
+                        : user.preferred_payment_method === 'manual'
+                          ? 'Manual transfers only'
+                          : 'Automatic payments only'}
+                    </p>
+                  </div>
+                  <Link
+                    href="/profile/payment-settings"
+                    className="text-teal-600 hover:text-teal-700 text-sm font-medium"
+                  >
+                    Change
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

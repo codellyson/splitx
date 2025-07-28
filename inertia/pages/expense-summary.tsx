@@ -5,6 +5,7 @@ import Footer from '../components/footer'
 import Expense from '#models/expense'
 import Group from '#models/group'
 import User from '#models/user'
+import { DateTime } from 'luxon'
 
 export default function ExpenseSummary(props: { group: Group; user: User; expenses: Expense[] }) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
@@ -25,46 +26,28 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
     })
 
     // Calculate member balances
-    const memberBalances = new Map<number, { paid: number; owed: number; balance: number }>()
+    const membersWithBalances = props.group.group_members.map((member) => {
+      // Calculate member statistics
+      const memberExpenses = props.expenses.filter((expense) => expense.paid_by === member.user_id)
+      const totalPaid = memberExpenses.reduce((acc, expense) => acc + Number(expense.amount), 0)
 
-    // Initialize all members
-    allUserIds.forEach((userId) => {
-      memberBalances.set(userId, { paid: 0, owed: 0, balance: 0 })
+      const memberSplits = props.expenses.flatMap(
+        (expense) =>
+          expense.expense_splits?.filter((split) => split.user_id === member.user_id) || []
+      )
+      const totalOwed = memberSplits.reduce((acc, split) => acc + Number(split.amount_owed), 0)
+
+      const balance = totalPaid - totalOwed
+
+      return {
+        ...member,
+        totalPaid,
+        totalOwed,
+        balance,
+        name: member.nickname || 'Unknown Member',
+        avatar: member.nickname?.charAt(0)?.toUpperCase() || 'U',
+      }
     })
-
-    // Calculate balances
-    props.expenses.forEach((expense) => {
-      const totalAmount = Number(expense.amount)
-      const paidBy = expense.paid_by
-
-      // Add what the payer paid
-      const payerBalance = memberBalances.get(paidBy) || { paid: 0, owed: 0, balance: 0 }
-      payerBalance.paid += totalAmount
-      memberBalances.set(paidBy, payerBalance)
-
-      // Subtract what each person owes
-      expense.expense_splits?.forEach((split) => {
-        const userBalance = memberBalances.get(split.user_id) || { paid: 0, owed: 0, balance: 0 }
-        userBalance.owed += Number(split.amount_owed)
-        memberBalances.set(split.user_id, userBalance)
-      })
-    })
-
-    // Calculate net balance for each member
-    memberBalances.forEach((balance, userId) => {
-      balance.balance = balance.paid - balance.owed
-    })
-
-    // Convert to array format for display
-    const members = Array.from(memberBalances.entries()).map(([userId, balance]) => ({
-      id: userId,
-      name: `User ${userId}`, // You might want to fetch user names from a separate query
-      email: `user${userId}@example.com`,
-      balance: balance.balance,
-      avatar: `U${userId}`,
-      totalPaid: balance.paid,
-      totalOwed: balance.owed,
-    }))
 
     // Process expenses for display
     const processedExpenses = props.expenses.map((expense) => {
@@ -76,8 +59,8 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
         id: expense.id,
         title: expense.title,
         amount: totalAmount,
-        paidBy: `User ${expense.paid_by}`,
-        category: 'general',
+        paidBy: expense.paidByUser,
+        category: expense.category,
         date: new Date(expense.created_at.toString()).toLocaleDateString(),
         description: expense.description,
         split: `Equal (${splitCount} people)`,
@@ -92,11 +75,11 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
       currency: 'NGN',
       createdAt: new Date(props.group.created_at.toString()).toLocaleDateString(),
       totalExpenses,
-      totalMembers: members.length,
+      totalMembers: props.group.group_members.length,
       period: `${new Date(props.group.created_at.toString()).toLocaleDateString()} - ${new Date().toLocaleDateString()}`,
       shareLink: `https://splitx.com/summary/${props.group.id}`,
       expenses: processedExpenses,
-      members,
+      members: membersWithBalances,
     }
   }, [props.group, props.expenses])
 
@@ -107,19 +90,221 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
   const handleGeneratePDF = async () => {
     setIsGeneratingPDF(true)
     try {
-      // Mock PDF generation
-      console.log('Generating PDF for group:', summary.groupId)
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      // Create a comprehensive HTML document for printing
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${summary.groupName} - Expense Summary</title>
+            <style>
+              @media print {
+                body { margin: 0; padding: 20px; }
+                .no-print { display: none; }
+              }
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                line-height: 1.6;
+                color: #333;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 20px;
+              }
+              .header h1 {
+                color: #2c3e50;
+                margin-bottom: 10px;
+              }
+              .summary {
+                margin-bottom: 30px;
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+              }
+              .expenses { margin-bottom: 30px; }
+              .members { margin-bottom: 30px; }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              th, td {
+                border: 1px solid #ddd;
+                padding: 12px;
+                text-align: left;
+              }
+              th {
+                background-color: #2c3e50;
+                color: white;
+                font-weight: bold;
+              }
+              tr:nth-child(even) { background-color: #f8f9fa; }
+              .total {
+                font-weight: bold;
+                background-color: #e9ecef;
+              }
+              .positive { color: #28a745; font-weight: bold; }
+              .negative { color: #dc3545; font-weight: bold; }
+              .footer {
+                margin-top: 40px;
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+                border-top: 1px solid #ddd;
+                padding-top: 20px;
+              }
+              .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+              }
+              .stat-card {
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                text-align: center;
+              }
+              .stat-value {
+                font-size: 24px;
+                font-weight: bold;
+                color: #2c3e50;
+              }
+              .stat-label {
+                font-size: 14px;
+                color: #666;
+                margin-top: 5px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>${summary.groupName} - Expense Summary</h1>
+              <p><strong>Period:</strong> ${summary.period}</p>
+              <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+            </div>
 
-      // Mock download
-      const link = document.createElement('a')
-      link.href = '#'
-      link.download = `splitx-summary-${summary.groupName.replace(/\s+/g, '-').toLowerCase()}.pdf`
-      link.click()
+            <div class="summary">
+              <h2>Summary</h2>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value">${formatCurrency(summary.totalExpenses)}</div>
+                  <div class="stat-label">Total Expenses</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${summary.totalMembers}</div>
+                  <div class="stat-label">Total Members</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${formatCurrency(summary.totalExpenses / summary.totalMembers)}</div>
+                  <div class="stat-label">Average per Person</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${summary.expenses.length}</div>
+                  <div class="stat-label">Total Expenses</div>
+                </div>
+              </div>
+            </div>
 
-      alert('PDF downloaded successfully!')
+            <div class="expenses">
+              <h2>Expenses Breakdown</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Paid By</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${summary.expenses
+                    .map(
+                      (expense) => `
+                    <tr>
+                      <td>${expense.title}</td>
+                      <td>${formatCurrency(expense.amount)}</td>
+                      <td>${expense.paidBy}</td>
+                      <td>${expense.date}</td>
+                      <td>${expense.category}</td>
+                    </tr>
+                  `
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="members">
+              <h2>Members & Balances</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Total Paid</th>
+                    <th>Total Owed</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${summary.members
+                    .map(
+                      (member) => `
+                    <tr>
+                      <td>${member.name}</td>
+                      <td>${formatCurrency(member.totalPaid)}</td>
+                      <td>${formatCurrency(member.totalOwed)}</td>
+                      <td class="${member.balance > 0 ? 'positive' : member.balance < 0 ? 'negative' : ''}">
+                        ${member.balance > 0 ? '+' : ''}${formatCurrency(member.balance)}
+                      </td>
+                      <td>${member.balance > 0 ? 'In Credit' : member.balance < 0 ? 'Owes Money' : 'Settled'}</td>
+                    </tr>
+                  `
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="footer">
+              <p>Generated by SplitX - Expense Management Made Easy</p>
+              <p>Generated on ${new Date().toLocaleString()}</p>
+            </div>
+          </body>
+        </html>
+      `
+
+      // Create a new window and print the content
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(htmlContent)
+        printWindow.document.close()
+
+        // Wait for content to load then print
+        printWindow.onload = () => {
+          printWindow.print()
+          printWindow.close()
+        }
+
+        // Show success notification
+        const notification = document.createElement('div')
+        notification.className =
+          'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50'
+        notification.textContent = 'PDF generation started! Check your print dialog.'
+        document.body.appendChild(notification)
+        setTimeout(() => document.body.removeChild(notification), 3000)
+      } else {
+        throw new Error('Popup blocked')
+      }
     } catch (error) {
-      alert('Failed to generate PDF. Please try again.')
+      console.error('PDF generation error:', error)
+      alert('Failed to generate PDF. Please allow popups and try again.')
     } finally {
       setIsGeneratingPDF(false)
     }
@@ -275,14 +460,15 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
           </div>
 
           {/* Summary Overview */}
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-2xl shadow-sm p-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Expenses</p>
                   <p className="text-2xl font-bold text-gray-800">
                     {formatCurrency(summary.totalExpenses)}
                   </p>
+                  <p className="text-xs text-gray-500 mt-1">{summary.expenses.length} expenses</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg flex items-center justify-center">
                   <svg
@@ -302,11 +488,14 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm p-6">
+            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Members</p>
                   <p className="text-2xl font-bold text-gray-800">{summary.totalMembers}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {summary.members.filter((m) => m.balance > 0).length} in credit
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
                   <svg
@@ -326,11 +515,14 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm p-6">
+            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Period</p>
-                  <p className="text-2xl font-bold text-gray-800">{summary.period}</p>
+                  <p className="text-lg font-bold text-gray-800">{summary.period}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date().getDate() - new Date(summary.createdAt).getDate()} days
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
                   <svg
@@ -350,12 +542,15 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm p-6">
+            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Average per Person</p>
                   <p className="text-2xl font-bold text-gray-800">
                     {formatCurrency(summary.totalExpenses / summary.totalMembers)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {summary.totalMembers > 0 ? 'per member' : 'No members'}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center">
@@ -381,75 +576,158 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Expenses List */}
             <div className="bg-white rounded-2xl shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">Expenses Breakdown</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-800">Expenses Breakdown</h2>
+                <span className="text-sm text-gray-500">{summary.expenses.length} expenses</span>
+              </div>
               <div className="space-y-4">
-                {summary.expenses.map((expense) => (
-                  <div key={expense.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-lg">
-                          {getCategoryIcon(expense.category)}
+                {summary.expenses.length > 0 ? (
+                  summary.expenses.map((expense) => (
+                    <div
+                      key={expense.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-xl">
+                            {getCategoryIcon(expense.category)}
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-800">{expense.title}</h3>
+                            <p className="text-sm text-gray-600">{expense.description}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Paid by {expense.paidBy.full_name} • {expense.date}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium text-gray-800">{expense.title}</h3>
-                          <p className="text-sm text-gray-600">{expense.description}</p>
+                        <div className="text-right">
+                          <p className="font-bold text-lg text-gray-800">
+                            {formatCurrency(expense.amount)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatCurrency(expense.perPerson)} each
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-800">{formatCurrency(expense.amount)}</p>
-                        <p className="text-xs text-gray-500">
-                          {formatCurrency(expense.perPerson)} each
-                        </p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Split: {expense.split}</span>
+                        <span className="bg-gray-100 px-2 py-1 rounded-full">
+                          {expense.category}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>Paid by {expense.paidBy}</span>
-                      <span>{expense.date}</span>
-                    </div>
-                    <div className="mt-2 text-xs text-gray-500">Split: {expense.split}</div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg
+                      className="w-12 h-12 mx-auto mb-4 text-gray-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    <p>No expenses recorded yet</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
             {/* Members & Balances */}
             <div className="bg-white rounded-2xl shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">Members & Balances</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-800">Group Members</h2>
+                <span className="text-sm text-gray-500">{summary.members.length} members</span>
+              </div>
               <div className="space-y-4">
-                {summary.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">{member.avatar}</span>
+                {summary.members.length > 0 ? (
+                  summary.members.map((member) => {
+                    // Use pre-calculated properties from useMemo
+                    console.log(member)
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-green-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">{member.avatar}</span>
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-800">{member.name}</h3>
+                            <p className="text-sm text-gray-600">
+                              Member since:{' '}
+                              {DateTime.fromISO(member.joined_at as any).toLocaleString(
+                                DateTime.DATE_MED
+                              )}
+                            </p>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <span className="text-xs text-gray-500">
+                                Paid: {formatCurrency(member.totalPaid)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                Owed: {formatCurrency(member.totalOwed)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold text-lg ${getBalanceColor(member.balance)}`}>
+                            {member.balance > 0 ? '+' : ''}
+                            {formatCurrency(member.balance)}
+                          </p>
+                          <p
+                            className={`text-xs ${member.balance > 0 ? 'text-green-500' : member.balance < 0 ? 'text-red-500' : 'text-gray-500'}`}
+                          >
+                            {member.balance > 0
+                              ? 'In Credit'
+                              : member.balance < 0
+                                ? 'Owes Money'
+                                : 'Settled'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-medium text-gray-800">{member.name}</h3>
-                        <p className="text-sm text-gray-600">{member.email}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-bold ${getBalanceColor(member.balance)}`}>
-                        {member.balance > 0 ? '+' : ''}
-                        {formatCurrency(member.balance)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Paid: {formatCurrency(member.totalPaid)}
-                      </p>
-                    </div>
+                    )
+                  })
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg
+                      className="w-12 h-12 mx-auto mb-4 text-gray-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    <p>No members in this group</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
 
           {/* Share Link Section */}
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Share Summary</h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Share Summary</h2>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                  Public Link
+                </span>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Share Link</label>
                 <div className="flex space-x-2">
                   <input
@@ -460,14 +738,40 @@ export default function ExpenseSummary(props: { group: Group; user: User; expens
                   />
                   <button
                     onClick={handleCopyLink}
-                    className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                    className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium flex items-center space-x-2"
                   >
-                    Copy
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span>Copy</span>
                   </button>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   Anyone with this link can view the expense summary
                 </p>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-800">{summary.expenses.length}</p>
+                  <p className="text-xs text-gray-600">Total Expenses</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-800">{summary.members.length}</p>
+                  <p className="text-xs text-gray-600">Members</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-800">
+                    {summary.members.filter((m) => m.balance === 0).length}
+                  </p>
+                  <p className="text-xs text-gray-600">Settled</p>
+                </div>
               </div>
             </div>
           </div>

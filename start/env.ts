@@ -48,4 +48,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_SECURE: Env.schema.boolean.optional(),
   MAIL_FROM: Env.schema.string.optional(),
   APP_URL: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Paystack integration
+  |----------------------------------------------------------
+  */
+  PAYSTACK_SECRET_KEY: Env.schema.string(),
 })

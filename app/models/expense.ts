@@ -43,14 +43,14 @@ export default class Expense extends BaseModel {
   declare expense_splits: relations.HasMany<typeof ExpenseSplits>
 
   @belongsTo(() => User, {
-    localKey: 'paid_by',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'paid_by',
   })
   declare paidByUser: relations.BelongsTo<typeof User>
 
   @belongsTo(() => Group, {
-    localKey: 'group_id',
-    foreignKey: 'id',
+    localKey: 'id',
+    foreignKey: 'group_id',
   })
   declare group: relations.BelongsTo<typeof Group>
 }

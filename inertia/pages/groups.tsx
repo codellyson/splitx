@@ -1,6 +1,6 @@
 import Group from '#models/group'
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Footer from '../components/footer'
 import Header from '../components/header'
 
@@ -8,48 +8,21 @@ export default function Groups(props: { groups: Group[]; user: any }) {
   const [showCreateModal, setShowCreateModal] = useState(false)
   console.log(props)
   const { groups: _groups, user } = props
-  // Mock data - replace with real data from backend
-  // const groups = [
-  //   {
-  //     id: 1,
-  //     name: 'Weekend Trip to Miami',
-  //     description: 'Beach vacation with friends',
-  //     members: 6,
-  //     totalExpenses: 1250.5,
-  //     yourBalance: -45.2,
-  //     currency: 'USD',
-  //     createdAt: '2024-01-15',
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Apartment Rent',
-  //     description: 'Monthly rent and utilities',
-  //     members: 3,
-  //     totalExpenses: 2800.0,
-  //     yourBalance: 0.0,
-  //     currency: 'USD',
-  //     createdAt: '2024-01-01',
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Birthday Party',
-  //     description: "Sarah's 25th birthday celebration",
-  //     members: 8,
-  //     totalExpenses: 320.75,
-  //     yourBalance: 15.5,
-  //     currency: 'USD',
-  //     createdAt: '2024-01-20',
-  //   },
-  // ]
 
-  const groups = _groups.map((group) => ({
-    ...group,
-    members: group.group_members.length,
-    totalExpenses: group.expenses.reduce((acc, expense) => acc + expense.amount, 0) || 0,
-    yourBalance: 0,
-    currency: 'USD',
-    createdAt: group.created_at,
-  }))
+  const groups = useMemo(() => {
+    return _groups.map((group) => {
+      const totalExpensesPaid =
+        group.expenses?.reduce((acc, expense) => acc + parseFloat(expense.amount as any), 0) || 0
+      return {
+        ...group,
+        members: group.group_members.length,
+        totalExpenses: group.expenses.length,
+        totalExpensesPaid: totalExpensesPaid,
+        currency: 'NGN',
+        createdAt: group.created_at,
+      }
+    })
+  }, [_groups])
 
   const [newGroup, setNewGroup] = useState({
     name: '',
@@ -84,26 +57,6 @@ export default function Groups(props: { groups: Group[]; user: any }) {
       }
     )
   }
-  //   [
-  //     {
-  //         "id": 1,
-  //         "name": "Nash Albert",
-  //         "description": "Non est expedita dol",
-  //         "created_by": 1,
-  //         "created_at": "2025-07-22T02:51:46.036+00:00",
-  //         "updated_at": "2025-07-22T02:51:46.037+00:00",
-  //         "group_members": [
-  //             {
-  //                 "id": 1,
-  //                 "user_id": 1,
-  //                 "group_id": 1,
-  //                 "nickname": "Lukman Isiaka",
-  //                 "created_at": "2025-07-22T02:51:46.582+00:00",
-  //                 "updated_at": "2025-07-22T02:51:46.582+00:00"
-  //             }
-  //         ]
-  //     }
-  // ]
 
   return (
     <>
@@ -178,34 +131,32 @@ export default function Groups(props: { groups: Group[]; user: any }) {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Total Expenses:</span>
-                    <span className="font-medium">${group.totalExpenses.toFixed(2)}</span>
+                    <span className="font-medium">{group.totalExpenses}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Your Balance:</span>
-                    <span
-                      className={`font-medium ${group.yourBalance > 0 ? 'text-green-600' : group.yourBalance < 0 ? 'text-red-600' : 'text-gray-600'}`}
-                    >
-                      {group.yourBalance > 0 ? '+' : ''}${group.yourBalance.toFixed(2)}
+                    <span className="text-gray-600">Total Expenses Paid:</span>
+                    <span className="font-medium">
+                      {group.totalExpensesPaid} / {group.totalExpenses}
                     </span>
                   </div>
                 </div>
 
-                {user.id === group.created_by && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleViewDetails(group.id)}
-                      className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                    >
-                      View Details
-                    </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleViewDetails(group.id)}
+                    className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    View Details
+                  </button>
+                  {user.id === group.created_by && (
                     <button
                       onClick={() => handleAddExpense(group.id)}
                       className="flex-1 bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
                     >
                       Add Expense
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -298,25 +249,6 @@ export default function Groups(props: { groups: Group[]; user: any }) {
                     value={newGroup.description}
                     onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
                   />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="currency"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Currency
-                  </label>
-                  <select
-                    id="currency"
-                    name="currency"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                  >
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="NGN">NGN (₦)</option>
-                  </select>
                 </div>
 
                 <div className="flex space-x-4 pt-4">
